@@ -162,4 +162,5 @@ cython_debug/
 
 # Data and models
 data/*/*
+data
 !.gitkeep

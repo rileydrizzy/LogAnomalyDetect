@@ -19,3 +19,7 @@ setup: install activate
 precommit: #
 	@echo "Running precommit on all files"
 	pre-commit run --all-files
+
+export:
+	@echo "Exporting dep to requirements file"
+	poetry export --without-hashes -f requirements.txt --output requirements.txt

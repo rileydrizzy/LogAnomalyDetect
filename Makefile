@@ -23,3 +23,7 @@ precommit: #
 export:
 	@echo "Exporting dep to requirements file"
 	poetry export --without-hashes -f requirements.txt --output requirements.txt
+
+backup: #used to push to Github without running precommit
+	git commit --no-verify -m "backup"
+	git push origin main

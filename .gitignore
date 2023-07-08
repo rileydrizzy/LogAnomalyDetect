@@ -164,3 +164,7 @@ cython_debug/
 #data/*/*
 data
 !.gitkeep
+
+#development area
+#dev.py
+#dev.ipynb

@@ -46,7 +46,7 @@ def unzip_file(zip_path, export_path):
             data_zip.extractall(export_path)
             print(f"Done extracting into json file {export_path}")
     except Exception as error:
-        print(f"An error occur while extracting file: {error}")
+        print(f"unzip_func -> An error occur while extracting file: {error}")
 
 
 def csv_loader(json_file, export_path):
@@ -87,7 +87,7 @@ def main():
     zipfile_loc = Path(project_dir, "data/raw/convolve-epoch1.zip")
     raw_data_loc = Path(project_dir, "data/raw/")
     json_file_loc = Path(raw_data_loc, "train.json")
-
+    print(zipfile_loc)
     unzip_file(zipfile_loc, raw_data_loc)
     csv_loc = Path(raw_data_loc, "raw_train.gzip")
     csv_loader(json_file_loc, csv_loc)

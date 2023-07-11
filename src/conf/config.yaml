@@ -1,10 +1,11 @@
 files:
-  raw_data:raw_train.gzip
-  raw_data: convolve-epoch.zip
+  raw_data: raw_train.gzip
+  raw_da: convolve-epoch.zip
   json_file: json.gzip
+  dev_data: "$(paths.data) dev.gzip"
 
 paths:
-  data: ${hydra:runtime.cwd}/..data/raw
+  data: ${hydra:runtime.cwd}/data/raw
   
 params:
   epoch_count: 28

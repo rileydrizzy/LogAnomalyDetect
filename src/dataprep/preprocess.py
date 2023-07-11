@@ -36,21 +36,32 @@ def clean_text_pro(text):
     text = re.sub('<[^>]*>', '', text)
     text = re.sub(r'[^a-zA-Z\s]', '', text)
     stop_words = set(stopwords.words('english'))
-    text = [word for word in text.split() 
+    text = [word for word in text.split()
             if word not in stop_words and word not in string.punctuation]
     text = ' '.join(word for word in text)
     return text
 
-#Implement the Encoder (static with normal - 0, and flag - 1)
-def encoder(data):
+def encoder(label):
     """doc
     """
-    
-    return data
-
+    if label == 'normal':
+        label = 0
+    else:
+        label = 1
+    return label
 
 def save_to_parquet(dataframe, file_loc):
     """doc
     """
     dataframe.write_parquet(file =file_loc, compression = 'gzip')
 
+
+def mani():
+    dataframes_set = load_spit()
+    for dataset in dataframes_set:
+        dataset = dataset.with_columns(pl.col('Target').apply(encoder, return_dtype=pl.Int32))
+        dataset = dataset.with_columns(pl.col('Log').apply(clean_text_pro))
+        save_to_parquet(dataset,)
+    
+if __name__ == '__main__':
+    pass

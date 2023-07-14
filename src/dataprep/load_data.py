@@ -4,57 +4,61 @@ The data for the project is stored as a zip file in the data directory
 This script perform the data unloading steps. The zip file is unzipped, as a json file.
 The json file is loaded to pandas Dataframe and then the data is export as a parquet file
 for efficient storage.
-For the Script to run correctly, it should be run on the project directory
 
 functions:
-    *unzip_file - unzip the zip file, exporting to the specifity loacation
-    and prints message of success
-    *csv_loader - read in json file, export file as parquet and prints message 
-    *del_loader - deletes the exported json file and prints done message
+    *unzip_file - unzip the zip file and export it
+    *export_parquet - read in json file and export file as parquet
+    *delete_json - deletes the exported json file
     *main - the main function of the script
 
 """
-
+#import hydra and replace dir
 import zipfile
 from pathlib import Path
-
 import pandas as pd
 
 
-def unzip_file(zip_path, export_path):
-    """unzip s
+def unzip_file(file_path, export_path):
+    """ unzip a zip file and export it at a given location
 
     Parameters
     ----------
-    file_loc : str
-        Str
-    print_cols : bool, optional
-        A flag used to print the columns to the console (default is
-        False)
-
+    file_path : str, Path object
+        The file path of the zip file
+    export_path : str
+        The path where to export the unzip the file
+    
     Returns
     -------
         None
-
-    Raises
-    ------
-        RuntimeError
-            Amount Withdrawn greater than Total_Money
+    
     """
+
     try:
-        with zipfile.ZipFile(zip_path, "r") as data_zip:
+        with zipfile.ZipFile(file_path, "r") as data_zip:
             data_zip.extractall(export_path)
             print(f"Done extracting into json file {export_path}")
+
     except Exception as error:
         print(f"unzip_func -> An error occur while extracting file: {error}")
 
 
-def csv_loader(json_file, export_path):
+def export_parquet(file_path, export_path):
     """
-    doc
+    Parameters
+    ----------
+    file_path : str, Path object
+        The file path of the json file
+    export_path : str
+        The path where to export the parquet file
+    
+    Returns
+    -------
+        None
     """
+
     try:
-        dataframe = pd.read_json(json_file, orient="index")
+        dataframe = pd.read_json(file_path, orient="index")
         dataframe.reset_index(inplace=True)
         dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
         dataframe.to_parquet(export_path, compression="gzip")
@@ -63,36 +67,48 @@ def csv_loader(json_file, export_path):
     except Exception as error:
         print(f"An error occur while exporting file: {error}")
 
+def delete_json(file_path):
+    """ Delete the json file to free up space
 
-def delete_json(json_file):
+    Parameters
+    ----------
+    file_path : str, Path object
+        The file path of the json file
+    
+    Returns
+    -------
+        None
     """
-    doc
-    """
-    file = Path(json_file)
+    
+    file_path = Path(file_path)
     try:
-        if file.exists() and file.is_file():
-            file.unlink()
-            print(f"File {json_file} has been succesfully deleted.")
+        if file_path.exists() and file_path.is_file():
+            file_path.unlink()
+            print(f"File {file_path} has been succesfully deleted.")
+
     except FileNotFoundError:
         pass
+
     except Exception as error:
         print(f"An error occur while trying to delete the file: {error}")
 
 
 def main():
     """
-    doc
+    run script
+
     """
     project_dir = Path.cwd()
     zipfile_loc = Path(project_dir, "data/raw/convolve-epoch1.zip")
     raw_data_loc = Path(project_dir, "data/raw/")
     json_file_loc = Path(raw_data_loc, "train.json")
-    print(zipfile_loc)
-    unzip_file(zipfile_loc, raw_data_loc)
     csv_loc = Path(raw_data_loc, "raw_train.gzip")
-    csv_loader(json_file_loc, csv_loc)
-    delete_json(json_file_loc)
+    print(zipfile_loc)
+    #main
+    try:
+        unzip_file(file_path= zipfile_loc, export_path= raw_data_loc)
+        export_parquet(file_path= json_file_loc, export_path= csv_loc)
+        delete_json(json_file_loc)
 
-
-if __name__ == "__main__":
-    main()
+    except Exception as error:
+        print(f"An error occur while trying to delete the file: {error}")

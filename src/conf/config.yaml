@@ -1,12 +1,18 @@
 files:
   raw_data: raw_train.gzip
-  raw_da: convolve-epoch.zip
-  json_file: json.gzip
+  json_file: dev_json.gzip
   dev_data: "$(paths.data) dev.gzip"
+  train_ds: 'train.gzip'
+  valid_ds: 'valid.gzip'
+  test_ds: 'test.gzip'
 
 paths:
   data: ${hydra:runtime.cwd}/data/raw
-  
+
+data:
+  batch: 100
+  shuffle_size: 100
+
 params:
   epoch_count: 28
   lr: 0.001

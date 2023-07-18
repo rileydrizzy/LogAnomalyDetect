@@ -1,0 +1,9 @@
+files:
+  raw_data: convolve-epoch1.zip
+  json_file: json.gzip
+  train_dataset: train.gzip
+  valid_datatset: valid.gzip
+  test_dataset: test.gzip
+  dev_zip: ${dev}$'dev.gzip'
+paths:
+  dev: ${hydra:runtime.cwd}/dev/

@@ -32,8 +32,6 @@ from omegaconf import DictConfig
 from nltk.corpus import stopwords
 nltk.download('stopwords')
 
-@hydra.main(config_name='config', config_path='conf', version_base= '1.2')
-
 def unzip_file(file_path, export_path):
     """ unzip a zip file and export it at a given location
 
@@ -178,23 +176,26 @@ def save_to_parquet(dataframe, file_path):
     """
     dataframe.write_parquet(file =file_path, compression = 'gzip')
 
+@hydra.main(config_name='config', config_path='conf', version_base= '1.2')
 def main(cfg: DictConfig):
     """
     run script
 
     """
-    #file_path for save files to be write
-    unzip_file(file_path= cfg, export_path= cfg)
-    export_parquet(file_path=cfg, export_path= cfg)
-    delete_json(file_path=cfg)
-    dataframes_set = load_spit(file_path= cfg, target= cfg.features.target)
+
+    unzip_file(file_path= cfg.files.raw_data, export_path= cfg.files.json_file)
+    export_parquet(file_path=cfg.files.json_file, export_path= cfg.files.)
+    delete_json(file_path=cfg.files.json_file)
+    dataframes_set = load_spit(file_path= cfg.files., target= cfg.features.target)
     
-    for dataset in dataframes_set:
+    dataframes_paths = (cfg.files.train_dataset,
+                         cfg.files.vaild_dataset, cfg.files.test_dataset)
+    for num, dataset in enumerate(dataframes_set):
         dataset = dataset.with_columns(pl.col(cfg.features.target).apply(
             label_encoder, return_dtype=pl.Int32))
         dataset = dataset.with_columns(pl.col(cfg.features.feature).apply(
             clean_text_preprocess))
-        save_to_parquet(dataframe= dataset, file_path=cfg)
+        save_to_parquet(dataframe= dataset, file_path=dataframes_paths[num])
 
 def testing_func():
     """return train and valid data

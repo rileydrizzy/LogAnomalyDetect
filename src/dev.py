@@ -8,6 +8,3 @@ def my_app(cfg: DictConfig):
     print(cfg.files.json_file)
     print(cfg.files.valid_dataset)
 my_app()
-
-string = cfg.files.valid_dataset
-print(string)

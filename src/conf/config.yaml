@@ -1,7 +1,7 @@
 files:
   raw_data: "${paths.data_raw}convolve-epoch1.zip"
-  json_file: "${paths.data_raw}json.gzip"
-  parquet_file: "${paths.data_raw}
+  json_file: "${paths.data_raw}raw_json.gzip"
+  parquet_file: "${paths.data_raw}raw_parquet"
   train_dataset: "${paths.data_processed}train.gzip"
   valid_dataset: "${paths.data_processed}valid.gzip"
   test_dataset: "${paths.data_processed}test.gzip"

@@ -32,8 +32,14 @@ def get_dataset(file_path, batch_size, shuffle_size, shuffle = True):
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
     dataset = dataset.batch(batch_size).prefetch(1)
-    #interleave??
     return dataset
+
+def class_weight_calc():
+    """
+    doc
+    """
+    pass 
+
 
 def testing_func():
     """return train and valid data

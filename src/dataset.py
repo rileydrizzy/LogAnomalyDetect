@@ -184,9 +184,9 @@ def main(cfg: DictConfig):
     """
 
     unzip_file(file_path= cfg.files.raw_data, export_path= cfg.files.json_file)
-    export_parquet(file_path=cfg.files.json_file, export_path= cfg.files.)
+    export_parquet(file_path=cfg.files.json_file, export_path= cfg.files.parquet_file)
     delete_json(file_path=cfg.files.json_file)
-    dataframes_set = load_spit(file_path= cfg.files., target= cfg.features.target)
+    dataframes_set = load_spit(file_path= cfg.files.parquet_file, target= cfg.features.target)
     
     dataframes_paths = (cfg.files.train_dataset,
                          cfg.files.vaild_dataset, cfg.files.test_dataset)
@@ -205,3 +205,4 @@ def testing_func():
 if __name__ == '__main__':
     print('Running Main')
     main()
+    print("All Done")

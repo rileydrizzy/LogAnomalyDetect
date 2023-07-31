@@ -1,3 +1,0 @@
-files:
-  raw_data: "${paths.data_raw}convolve-epoch1.zip"
-  json_file: "TESTING TESTING"

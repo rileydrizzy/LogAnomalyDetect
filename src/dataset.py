@@ -187,15 +187,10 @@ def main(cfg: DictConfig):
     export_parquet(file_path=cfg.files.json_file, export_path= cfg.files.parquet_file)
     delete_json(file_path=cfg.files.json_file)
     dataframes_set = load_spit(file_path= cfg.files.parquet_file, target= cfg.features.target)
-    
     dataframes_paths = (cfg.files.train_dataset,
                          cfg.files.vaild_dataset, cfg.files.test_dataset)
-    for num, dataset in enumerate(dataframes_set):
-        dataset = dataset.with_columns(pl.col(cfg.features.target).apply(
-            label_encoder, return_dtype=pl.Int32))
-        dataset = dataset.with_columns(pl.col(cfg.features.feature).apply(
-            clean_text_preprocess))
-        save_to_parquet(dataframe= dataset, file_path=dataframes_paths[num])
+    for index, dataset in enumerate(dataframes_set):        
+        save_to_parquet(dataframe= dataset, file_path= dataframes_paths[index])
 
 def testing_func():
     """return train and valid data

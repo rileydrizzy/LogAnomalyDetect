@@ -1,11 +1,9 @@
 """ utils
 """
-
+import os
 import string
 import re
 import nltk
-import hydra
-from omegaconf import DictConfig
 import polars as pl
 import tensorflow as tf
 from nltk.corpus import stopwords
@@ -15,6 +13,7 @@ def clean_text_preprocess(text_row):
     """ performs preprocessing steps on each text row removing numbers, 
     stopwords, punctuation and any symbols
 
+    
     Returns 
     -------
     clean_text : row
@@ -31,8 +30,9 @@ def clean_text_preprocess(text_row):
     return clean_text
 
 def label_encoder(target_df):
-    """performs label encoding for binary class
+    """performs label encoding for target label 
 
+    
     Returns
     -------
     label : int
@@ -47,7 +47,7 @@ def label_encoder(target_df):
 
 def get_dataset(file_path, batch_size, shuffle_size, shuffle = True):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
-    to speed up computation
+    to speed up computation during training
 
     Parameters
     ----------
@@ -76,7 +76,7 @@ def get_dataset(file_path, batch_size, shuffle_size, shuffle = True):
     dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
-    dataset = dataset.batch(batch_size).prefetch(1)
+    dataset = dataset.batch(batch_size).prefetch(buffer_size= tf.data.AUTOTUNE)
     return dataset
 
 def testing_func():
@@ -84,7 +84,23 @@ def testing_func():
     """
     print('getting data')
 
-tokenizer = tf.keras.layers.TextVectorization(split= 'whitespace', output_mode= 'int',
-                                              output_sequence_length= sequence_lenght)
+def set_seed(seed = 42):
+    """doc
+    """
 
-tf.keras.layers.Embedding(input_dim=, output_dim=, mask_zero= ,)
+    tf.experimental.numpy.random.seed(seed)
+    tf.keras.utils.set_random_seed(seed)
+    # When running on the CuDNN backend, two further options must be set
+    os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
+    os.environ['TF_DETERMINISTIC_OPS'] = '1'
+    # Set a fixed value for the hash seed
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    print(f"Random seed set as {seed}")
+
+
+#USED CODE
+sequence_length = 100
+tokenizer_layer = tf.keras.layers.TextVectorization(split= 'whitespace', output_mode= 'int',
+                                              output_sequence_length= sequence_length)
+tokenizer_layer.adapt()
+vocab_size = tokenizer_layer.get_vocabulary()

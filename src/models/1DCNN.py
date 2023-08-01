@@ -2,10 +2,6 @@
 
 """
 
-import tensorflow as tf
 import hydra
+import tensorflow as tf
 from omegaconf import DictConfig
-
-
-def build_model():
-    input_layer = tf.keras.Input

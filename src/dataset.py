@@ -15,16 +15,18 @@ functions:
     *main - the main function to run the script
 
 """
-
 import zipfile
-import polars as pl
+from pathlib import Path
+
 import hydra
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import polars as pl
 from omegaconf import DictConfig
+from sklearn.model_selection import train_test_split
+
 
 def unzip_file(file_path, export_path):
-    """ unzip a zip file and export it at a given location
+    """unzip a zip file and export it at a given location
 
     Parameters
     ----------
@@ -32,15 +34,16 @@ def unzip_file(file_path, export_path):
         The file path of the zip file
     export_path : str
         The path where to export the unzip the file
-    
+
     Returns
     -------
         None
-    
+
     """
 
     with zipfile.ZipFile(file_path, "r") as data_zip:
         data_zip.extractall(export_path)
+
 
 def export_parquet(file_path, export_path):
     """read in json file, create and adjust data which headers.
@@ -52,7 +55,7 @@ def export_parquet(file_path, export_path):
         The file path of the json file
     export_path : str
         The path where to export the parquet file
-    
+
     Returns
     -------
         None
@@ -63,19 +66,20 @@ def export_parquet(file_path, export_path):
     dataframe.to_parquet(export_path, compression="gzip")
     print(f"Done Exporting parquet file to {export_path}")
 
+
 def delete_json(file_path):
-    """ Delete the unused json file to free up storage space
+    """Delete the unused json file to free up storage space
 
     Parameters
     ----------
     file_path : str, Path object
         The file path of the json file
-    
+
     Returns
     -------
         None
     """
-
+    file_path = Path(file_path)
     try:
         if file_path.exists() and file_path.is_file():
             file_path.unlink()
@@ -86,6 +90,7 @@ def delete_json(file_path):
 
     except Exception as error:
         print(f"An error occur while trying to delete the file: {error}")
+
 
 def load_spit(file_path, target):
     """create dataframe and split the data into train, valid and test set,
@@ -98,7 +103,7 @@ def load_spit(file_path, target):
         The file path of the file
     target : str
         The column name of the target
-    
+
     Returns
     -------
     new_data : tuple
@@ -116,6 +121,7 @@ def load_spit(file_path, target):
     datasets_tuple = (train_data, valid_data, test_data)
     return datasets_tuple
 
+
 def save_to_parquet(dataframe, file_path):
     """save the dataframe as a parquet file
 
@@ -130,31 +136,38 @@ def save_to_parquet(dataframe, file_path):
     -------
         None
     """
-    dataframe.write_parquet(file= file_path, compression= 'gzip')
+    dataframe.write_parquet(file=file_path, compression="gzip")
     return
 
 
-@hydra.main(config_name='config', config_path='conf', version_base= '1.2')
+@hydra.main(config_name="config", config_path="conf", version_base="1.2")
 def main(cfg: DictConfig):
     """
     run script
 
     """
 
-    unzip_file(file_path= cfg.files.raw_data, export_path= cfg.files.json_file)
-    export_parquet(file_path=cfg.files.json_file, export_path= cfg.files.parquet_file)
+    unzip_file(file_path=cfg.files.raw_data, export_path=cfg.paths.data_raw)
+    export_parquet(
+        file_path=cfg.files.json_file, export_path=cfg.files.parquet_file
+    )
     delete_json(file_path=cfg.files.json_file)
-    dataframes_set = load_spit(file_path= cfg.files.parquet_file, target= cfg.features.target)
-    dataframes_paths = (cfg.files.train_dataset,
-                         cfg.files.vaild_dataset, cfg.files.test_dataset)
-    for index, dataset in enumerate(dataframes_set):        
-        save_to_parquet(dataframe= dataset, file_path= dataframes_paths[index])
+    dataframes_set = load_spit(
+        file_path=cfg.files.parquet_file, target="Target"
+    )
+    dataframes_paths = (
+        cfg.files.train_dataset,
+        cfg.files.valid_dataset,
+        cfg.files.test_dataset,
+    )
+    for index, dataset in enumerate(dataframes_set):
+        save_to_parquet(dataframe=dataset, file_path=dataframes_paths[index])
 
 
 def testing_func():
-    """return train and valid data
-    """
-    print('getting data')
+    """return train and valid data"""
+    print("getting data")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

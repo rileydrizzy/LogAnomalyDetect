@@ -1,6 +1,6 @@
 files:
   raw_data: "${paths.data_raw}convolve-epoch1.zip"
-  json_file: "${paths.data_raw}raw_json.gzip"
+  json_file: "${paths.data_raw}train.json"
   parquet_file: "${paths.data_raw}raw_parquet"
   train_dataset: "${paths.data_processed}train.gzip"
   valid_dataset: "${paths.data_processed}valid.gzip"
@@ -11,7 +11,3 @@ paths:
   data_raw: ${hydra:runtime.cwd}/data/raw/
   data_processed: ${hydra:runtime.cwd}/data/processed/
   dev: ${hydra:runtime.cwd}/dev/
-
-features:
-  target: 'Target'
-  feature: 'Log'

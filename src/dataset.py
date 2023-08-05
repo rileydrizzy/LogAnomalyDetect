@@ -23,6 +23,7 @@ import pandas as pd
 import polars as pl
 from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
+from utils.logger import logger
 
 
 def unzip_file(file_path, export_path):
@@ -64,8 +65,6 @@ def export_parquet(file_path, export_path):
     dataframe.reset_index(inplace=True)
     dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
     dataframe.to_parquet(export_path, compression="gzip")
-    print(f"Done Exporting parquet file to {export_path}")
-
 
 def delete_json(file_path):
     """Delete the unused json file to free up storage space
@@ -83,14 +82,9 @@ def delete_json(file_path):
     try:
         if file_path.exists() and file_path.is_file():
             file_path.unlink()
-            print(f"File {file_path} has been succesfully deleted.")
-
+            
     except FileNotFoundError:
         pass
-
-    except Exception as error:
-        print(f"An error occur while trying to delete the file: {error}")
-
 
 def load_spit(file_path, target):
     """create dataframe and split the data into train, valid and test set,
@@ -140,34 +134,36 @@ def save_to_parquet(dataframe, file_path):
     return
 
 
-@hydra.main(config_name="config", config_path="conf", version_base="1.2")
+@hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):
     """
     run script
 
     """
+    # TODO remove prints statements
+    logger.info("Commencing the data unzipping process.")
+    try:
+        unzip_file(file_path=cfg.files.raw_data, export_path=cfg.paths.data_raw)
+        print("Stage one done")
+        export_parquet(file_path=cfg.files.json_file, export_path=cfg.files.parquet_file)
+        print("Stage two done")
+        delete_json(file_path=cfg.files.json_file)
 
-    unzip_file(file_path=cfg.files.raw_data, export_path=cfg.paths.data_raw)
-    export_parquet(
-        file_path=cfg.files.json_file, export_path=cfg.files.parquet_file
-    )
-    delete_json(file_path=cfg.files.json_file)
-    dataframes_set = load_spit(
-        file_path=cfg.files.parquet_file, target="Target"
-    )
-    dataframes_paths = (
-        cfg.files.train_dataset,
-        cfg.files.valid_dataset,
-        cfg.files.test_dataset,
-    )
-    for index, dataset in enumerate(dataframes_set):
-        save_to_parquet(dataframe=dataset, file_path=dataframes_paths[index])
+        logger.success("Data has been unzipped and saved at {cfg.files.parquet_file}")
+        logger.info("Initiating the data splitting procedure.")
 
+        dataframes_set = load_spit(file_path=cfg.files.parquet_file, target="Target")
+        dataframes_paths = (
+            cfg.files.train_dataset,
+            cfg.files.valid_dataset,
+            cfg.files.test_dataset,
+        )
+        for index, dataset in enumerate(dataframes_set):
+            save_to_parquet(dataframe=dataset, file_path=dataframes_paths[index])
+        logger.success("Data has been splitted and saved at {cfg.paths.data_processed}")
 
-def testing_func():
-    """return train and valid data"""
-    print("getting data")
-
+    except Exception:
+        logger.exception("Data unloading was unsuccesfully")
 
 if __name__ == "__main__":
     main()

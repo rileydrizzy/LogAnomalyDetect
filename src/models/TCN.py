@@ -2,8 +2,8 @@
 doc
 """
 
-import tensorflow as tf
 import hydra
+import tensorflow as tf
 from omegaconf import DictConfig
 
 Input_layer = tf.keras.layers.Input(shape= )

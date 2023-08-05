@@ -1,0 +1,13 @@
+
+download and save data
+split data into train, valid, and test set
+setup env 
+mflow
+tensorboard
+distribution strategy
+import model
+import data
+
+train
+evaleut
+save weight and model

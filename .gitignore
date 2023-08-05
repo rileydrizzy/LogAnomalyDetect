@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+logenv
 
 # Spyder project settings
 .spyderproject
@@ -165,4 +166,5 @@ data/*/*
 !.gitkeep
 
 #development area
-dev
+dev.gzip
+artifacts/*

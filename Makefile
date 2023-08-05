@@ -8,13 +8,14 @@ help:
 install:
 	@echo "Installing..."
 	python -m pip install -r requirements.txt
+	pip install pre-commit
 	pre-commit install
 	
 activate:
 	@echo "Activating virtual environment"
-	python source env/bin/activate
+	source logenv/bin/activate
 
-setup: install activate
+setup: install
 
 precommit:
 	@echo "Running precommit on all files"

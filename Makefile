@@ -1,30 +1,29 @@
-
 .DEFAULT_GOAL := help
 
 help:
 	@echo "    prepare              desc of the command prepare"
 	@echo "    install              desc of the command install"
 
-install: #int
+
+install:
 	@echo "Installing..."
-	curl -sSL https://install.python-poetry.org | python -
-	poetry install
-	poetry run pre-commit install
+	python -m pip install -r requirements.txt
+	pre-commit install
 	
 activate:
 	@echo "Activating virtual environment"
-	poetry shell
+	python source env/bin/activate
 
 setup: install activate
 
-precommit: #
+precommit:
 	@echo "Running precommit on all files"
 	pre-commit run --all-files
 
 export:
-	@echo "Exporting dep to requirements file"
-	poetry export --without-hashes -f requirements.txt --output requirements.txt
+	@echo "Exporting dependencies to requirements file"
+	python -m pip freeze > requirements.txt
 
-backup: #used to push to Github without running precommit
+force backup: # To push to Github without running precommit
 	git commit --no-verify -m "backup"
 	git push origin main

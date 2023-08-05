@@ -53,7 +53,7 @@ def label_encoder(target_df):
     return label
 
 
-def get_dataset(file_path, batch_size, shuffle_size, shuffle=True):
+def get_dataset(file_path, batch_size, shuffle_size= 100, shuffle=True):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
     to speed up computation during training
 
@@ -88,11 +88,6 @@ def get_dataset(file_path, batch_size, shuffle_size, shuffle=True):
     return dataset
 
 
-def testing_func():
-    """return train and valid data"""
-    print("getting data")
-
-
 def set_seed(seed=42):
     """doc"""
 
@@ -106,10 +101,28 @@ def set_seed(seed=42):
     print(f"Random seed set as {seed}")
 
 
-# USED CODE
-sequence_length = 100
-tokenizer_layer = tf.keras.layers.TextVectorization(
-    split="whitespace", output_mode="int", output_sequence_length=sequence_length
-)
-tokenizer_layer.adapt()
-vocab_size = tokenizer_layer.get_vocabulary()
+def text_vec(dataset, sequence_length):
+    """_summary_
+
+    Parameters
+    ----------
+    dataset : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    log_ds = dataset.map(lambda text,label: text)
+    tokenizer_layer = tf.keras.layers.TextVectorization(
+        split="whitespace", output_mode="int", output_sequence_length=sequence_length
+        )
+    tokenizer_layer.adapt(log_ds)
+    vocab_size = tokenizer_layer.vocabulary_size()
+
+    return tokenizer_layer, vocab_size
+
+
+def tensorboard():
+    

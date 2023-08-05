@@ -3,8 +3,9 @@ doc
 """
 
 import hydra
-import tensorflow as tf
 from omegaconf import DictConfig
 
-Input_layer = tf.keras.layers.Input(shape= )
-#embe = tf.keras.em 
+
+@hydra.main(config_name="models", config_path="config", version_base="1.2")
+def test_func(cfg: DictConfig):
+    print(cfg)

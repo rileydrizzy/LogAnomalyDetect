@@ -23,6 +23,7 @@ import pandas as pd
 import polars as pl
 from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
+
 from utils.logger import logger
 
 
@@ -66,6 +67,7 @@ def export_parquet(file_path, export_path):
     dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
     dataframe.to_parquet(export_path, compression="gzip")
 
+
 def delete_json(file_path):
     """Delete the unused json file to free up storage space
 
@@ -82,9 +84,10 @@ def delete_json(file_path):
     try:
         if file_path.exists() and file_path.is_file():
             file_path.unlink()
-            
+
     except FileNotFoundError:
         pass
+
 
 def load_spit(file_path, target):
     """create dataframe and split the data into train, valid and test set,
@@ -145,7 +148,9 @@ def main(cfg: DictConfig):
     try:
         unzip_file(file_path=cfg.files.raw_data, export_path=cfg.paths.data_raw)
         print("Stage one done")
-        export_parquet(file_path=cfg.files.json_file, export_path=cfg.files.parquet_file)
+        export_parquet(
+            file_path=cfg.files.json_file, export_path=cfg.files.parquet_file
+        )
         print("Stage two done")
         delete_json(file_path=cfg.files.json_file)
 
@@ -164,6 +169,7 @@ def main(cfg: DictConfig):
 
     except Exception:
         logger.exception("Data unloading was unsuccesfully")
+
 
 if __name__ == "__main__":
     main()

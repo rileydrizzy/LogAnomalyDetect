@@ -1,5 +1,5 @@
-import pandas as pd
 import hydra
+import pandas as pd
 from omegaconf import DictConfig
 
 
@@ -23,8 +23,9 @@ def export_parquet(file_path, export_path):
     dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
     dataframe.to_parquet(export_path, compression="gzip")
 
-json_file = '/workspaces/log_anomaly/data/raw/train.json'
-paq = '/workspaces/log_anomaly/data/raw/raw_parquet'
 
-df = pd.read_json(json_file, orient='index')
+json_file = "/workspaces/log_anomaly/data/raw/train.json"
+paq = "/workspaces/log_anomaly/data/raw/raw_parquet"
+
+df = pd.read_json(json_file, orient="index")
 print(df.shape)

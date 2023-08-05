@@ -13,16 +13,18 @@ functions:
     *main - the main function of the script
 
 """
-#import hydra and replace dir
+# import hydra and replace dir
 
-import string
 import re
+import string
+
+import nltk
 import polars as pl
 import tensorflow as tf
-import nltk
-from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
-nltk.download('stopwords')
+from sklearn.model_selection import train_test_split
+
+nltk.download("stopwords")
 
 
 def load_spit(file_path, target):
@@ -36,13 +38,13 @@ def load_spit(file_path, target):
         The file path of the file
     target : str
         The column name of the target
-    
+
     Returns
     -------
     new_data : tuple
         A tuple containing the train_data, valid_data, test_data
     """
-    
+
     datarame = pl.read_parquet(file_path)
 
     train_data, data = train_test_split(
@@ -54,29 +56,34 @@ def load_spit(file_path, target):
     new_data = (train_data, valid_data, test_data)
     return new_data
 
+
 def clean_text_preprocess(text_row):
-    """ performs preprocessing  steps on each text row
-    removing numbers, stopwords, punctuation and any 
+    """performs preprocessing  steps on each text row
+    removing numbers, stopwords, punctuation and any
 
     Parameters
     ----------
     text_row : str
         text
-        
-    Returns 
+
+    Returns
     -------
     clean_text : s
-        A cleaned and preprocessed text 
+        A cleaned and preprocessed text
     """
 
     text_row = text_row.lower()
-    text_row = re.sub('<[^>]*>', '', text_row)
-    text_row = re.sub(r'[^a-zA-Z\s]', '', text_row)
-    stop_words = set(stopwords.words('english'))
-    text_row = [word for word in text_row.split()
-            if word not in stop_words and word not in string.punctuation]
-    clean_text = ' '.join(word for word in text_row)
+    text_row = re.sub("<[^>]*>", "", text_row)
+    text_row = re.sub(r"[^a-zA-Z\s]", "", text_row)
+    stop_words = set(stopwords.words("english"))
+    text_row = [
+        word
+        for word in text_row.split()
+        if word not in stop_words and word not in string.punctuation
+    ]
+    clean_text = " ".join(word for word in text_row)
     return clean_text
+
 
 def label_encoder(target_df):
     """performs label encoding for binary class
@@ -92,11 +99,12 @@ def label_encoder(target_df):
         return either 0 for normal or 1 for abnormal
     """
 
-    if target_df == 'normal':
+    if target_df == "normal":
         label = 0
     else:
         label = 1
     return label
+
 
 def save_to_parquet(dataframe, file_path):
     """save the dataframe as a parquet file
@@ -112,9 +120,10 @@ def save_to_parquet(dataframe, file_path):
     -------
         None
     """
-    dataframe.write_parquet(file =file_path, compression = 'gzip')
+    dataframe.write_parquet(file=file_path, compression="gzip")
 
-def _dataset_func(file_path, batch_size, shuffle_size, shuffle = True):
+
+def _dataset_func(file_path, batch_size, shuffle_size, shuffle=True):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
     to speed up computation
 
@@ -123,9 +132,9 @@ def _dataset_func(file_path, batch_size, shuffle_size, shuffle = True):
     file_path : str
         path of the parquet file
     batch_size : int
-        Batch size 
+        Batch size
     shuffle_size : int
-        Size of the buffer for shuffle 
+        Size of the buffer for shuffle
     shuffle : bool, Default = True
         perform shuffle on the dataset, if false it doesn't
 
@@ -136,10 +145,10 @@ def _dataset_func(file_path, batch_size, shuffle_size, shuffle = True):
     """
 
     dataframe = pl.read_parquet(file_path)
-    features_df = dataframe['Log']
-    target_df = dataframe['Target']
+    features_df = dataframe["Log"]
+    target_df = dataframe["Target"]
     dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
-    dataset = dataset.batch(batch_size).prefetch(1) #interleave??
+    dataset = dataset.batch(batch_size).prefetch(1)  # interleave??
     return dataset

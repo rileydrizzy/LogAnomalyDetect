@@ -4,6 +4,7 @@ import os
 import re
 import string
 
+import mlflow
 import nltk
 import polars as pl
 import tensorflow as tf
@@ -53,7 +54,7 @@ def label_encoder(target_df):
     return label
 
 
-def get_dataset(file_path, batch_size, shuffle_size= 100, shuffle=True):
+def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=True):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
     to speed up computation during training
 
@@ -89,7 +90,13 @@ def get_dataset(file_path, batch_size, shuffle_size= 100, shuffle=True):
 
 
 def set_seed(seed=42):
-    """doc"""
+    """_summary_
+
+    Parameters
+    ----------
+    seed : int, optional
+        _description_, by default 42
+    """
 
     tf.experimental.numpy.random.seed(seed)
     tf.keras.utils.set_random_seed(seed)
@@ -101,7 +108,7 @@ def set_seed(seed=42):
     print(f"Random seed set as {seed}")
 
 
-def text_vec(dataset, sequence_length):
+def get_tokenizer(dataset, sequence_length):
     """_summary_
 
     Parameters
@@ -114,15 +121,32 @@ def text_vec(dataset, sequence_length):
     _type_
         _description_
     """
-    log_ds = dataset.map(lambda text,label: text)
+    log_ds = dataset.map(lambda text, label: text)
     tokenizer_layer = tf.keras.layers.TextVectorization(
         split="whitespace", output_mode="int", output_sequence_length=sequence_length
-        )
+    )
     tokenizer_layer.adapt(log_ds)
     vocab_size = tokenizer_layer.vocabulary_size()
 
     return tokenizer_layer, vocab_size
 
 
-def tensorboard():
-    
+def tracking(name):
+    """_summary_
+
+    Parameters
+    ----------
+    name : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    mlflow.set_tracking_uri("https://dagshub.com/rileydrizzy/dogbreeds_dect.mlflow")
+    experiment = mlflow.get_experiment_by_name(name)
+    if experiment is None:
+        experiment_id = mlflow.create_experiment(name)
+        return experiment_id
+    return experiment.experiment_id

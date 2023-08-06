@@ -13,7 +13,7 @@ install:
 	
 activate:
 	@echo "Activating virtual environment"
-	source logenv/bin/activate
+	source env/bin/activate
 
 setup: install
 

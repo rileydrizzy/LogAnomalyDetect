@@ -9,8 +9,8 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 __version__ = "0.0.0"
 
-REPO_NAME = "REPO_TEMPLATE"
-AUTHOR_USER_NAME = "Ipadeola Ladipo Ezekiel"
+REPO_NAME = "log_anomaly"
+AUTHOR_USER_NAME = "rileydrizzy"
 SRC_REPO = "src"
 AUTHOR_EMAIL = "ipadeolaoladipo@outlook.com"
 

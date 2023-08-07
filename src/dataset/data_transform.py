@@ -9,7 +9,7 @@ import nltk
 import polars as pl
 from nltk.corpus import stopwords
 from omegaconf import DictConfig
-from src.utils.logger import logger
+from utils.logger import logger
 nltk.download("stopwords")
 
 
@@ -72,7 +72,7 @@ def preprocess_and_encode(file_path, save_path):
     dataframe.write_parquet(file=save_path, compression="gzip")
 
 
-@hydra.main(config_path="config", config_name="config", version_base="1.2")
+@hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")
 def main(cfg: DictConfig):
     """_summary_
 
@@ -83,13 +83,19 @@ def main(cfg: DictConfig):
     """
     logger.info("Initiating logger for data processing and saving (train, valid, test).")
     try:
+        logger.info("Commencing preprocessing and saving of Train data")
         preprocess_and_encode(file_path=cfg.files.raw.raw_train_data, save_path=cfg.files.processed.train_dataset)
+        logger.success("Train data has been preprocessed and saved")
+        logger.info("Commencing preprocessing and saving of Valid data")
         preprocess_and_encode(file_path=cfg.files.raw.raw_valid_data, save_path=cfg.files.processed.valid_dataset)
+        logger.success("Valid data has been preprocessed and saved")
+        logger.info("Commencing preprocessing and saving of Test data")
         preprocess_and_encode(file_path=cfg.files.raw.raw_test_data, save_path=cfg.files.processed.test_dataset)
-        logger.success('Data has been processed, cleaned and saved')
+        logger.success("Test data has been preprocessed and saved")
     except Exception:
         pass
 
 
 if __name__ == "__main__":
     main()
+    logger.success('Data has been processed, cleaned and saved')

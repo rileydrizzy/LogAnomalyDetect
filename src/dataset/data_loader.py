@@ -137,7 +137,7 @@ def save_to_parquet(dataframe, save_path):
     return
 
 
-@hydra.main(config_name="config", config_path="config", version_base="1.2")
+@hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")
 def main(cfg: DictConfig):
     """
     run script
@@ -145,22 +145,22 @@ def main(cfg: DictConfig):
     """
     logger.info("Commencing the data unzipping process.")
     try:
-        unzip_file(file_path=cfg.files.raw_data, save_path=cfg.paths.data_raw)
-        export_parquet(file_path=cfg.files.json_file, save_path=cfg.files.parquet_file)
-        delete_json(file_path=cfg.files.json_file)
+        unzip_file(file_path=cfg.files.raw.raw_data, save_path=cfg.paths.data_raw)
+        export_parquet(file_path=cfg.files.raw.json_file, save_path=cfg.files.raw.parquet_file)
+        delete_json(file_path=cfg.files.raw.json_file)
 
-        logger.success("Data has been unzipped and saved at {cfg.files.parquet_file}")
+        logger.success(f"Data has been unzipped and saved at {cfg.files.raw.parquet_file}")
         logger.info("Initiating the data splitting procedure.")
 
-        dataframes_set = load_spit(file_path=cfg.files.parquet_file, target="Target")
+        dataframes_set = load_spit(file_path=cfg.files.raw.parquet_file, target="Target")
         dataframes_paths = (
-            cfg.files.train_dataset,
-            cfg.files.valid_dataset,
-            cfg.files.test_dataset,
+            cfg.files.raw.raw_train_data,
+            cfg.files.raw.raw_valid_data,
+            cfg.files.raw.raw_test_data,
         )
         for index, dataset in enumerate(dataframes_set):
             save_to_parquet(dataframe=dataset, save_path=dataframes_paths[index])
-        logger.success("Data has been splitted and saved at {cfg.paths.data_processed}")
+        logger.success(f"Data has been splitted and saved at directory {cfg.paths.data_processed}")
 
     except Exception:
         logger.exception("Data unloading was unsuccesfully")

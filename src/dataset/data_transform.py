@@ -9,7 +9,7 @@ import nltk
 import polars as pl
 from nltk.corpus import stopwords
 from omegaconf import DictConfig
-
+from src.utils.logger import logger
 nltk.download("stopwords")
 
 
@@ -81,10 +81,12 @@ def main(cfg: DictConfig):
     cfg : DictConfig
         _description_
     """
+    logger.info("Initiating logger for data processing and saving (train, valid, test).")
     try:
         preprocess_and_encode(file_path=cfg.files.raw.raw_train_data, save_path=cfg.files.processed.train_dataset)
         preprocess_and_encode(file_path=cfg.files.raw.raw_valid_data, save_path=cfg.files.processed.valid_dataset)
         preprocess_and_encode(file_path=cfg.files.raw.raw_test_data, save_path=cfg.files.processed.test_dataset)
+        logger.success('Data has been processed, cleaned and saved')
     except Exception:
         pass
 

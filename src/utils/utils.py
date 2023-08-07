@@ -1,60 +1,11 @@
 """ utils
 """
 import os
-import re
-import string
-
 import mlflow
-import nltk
 import polars as pl
 import tensorflow as tf
-from nltk.corpus import stopwords
 
-nltk.download("stopwords")
-
-
-def clean_text_preprocess(text_row):
-    """performs preprocessing steps on each text row removing numbers,
-    stopwords, punctuation and any symbols
-
-
-    Returns
-    -------
-    clean_text : row
-        A cleaned and preprocessed text
-    """
-
-    text_row = text_row.lower()
-    text_row = re.sub("<[^>]*>", "", text_row)
-    text_row = re.sub(r"[^a-zA-Z\s]", "", text_row)
-    stop_words = set(stopwords.words("english"))
-    text_row = [
-        word
-        for word in text_row.split()
-        if word not in stop_words and word not in string.punctuation
-    ]
-    clean_text = " ".join(word for word in text_row)
-    return clean_text
-
-
-def label_encoder(target_df):
-    """performs label encoding for target label
-
-
-    Returns
-    -------
-    label : int
-        return either 0 for normal or 1 for abnormal
-    """
-
-    if target_df == "normal":
-        label = 0
-    else:
-        label = 1
-    return label
-
-
-def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=True):
+def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=False):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
     to speed up computation during training
 
@@ -74,13 +25,6 @@ def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=True):
     dataset : Dataset
         A tensorflow Dataset with features and label
     """
-
-    dataframe = pl.read_parquet(file_path)
-    dataframe = dataframe.with_columns(
-        pl.col("Target").apply(label_encoder, return_dtype=pl.Int32)
-    )
-    dataframe = dataframe.with_columns(pl.col("Log").apply(clean_text_preprocess))
-    # ! alert
     dataframe = pl.read_parquet(file_path)
     features_df = dataframe["Log"]
     target_df = dataframe["Target"]
@@ -110,7 +54,7 @@ def set_seed(seed=42):
     print(f"Random seed set as {seed}")
 
 
-def get_tokenizer(dataset, sequence_length):
+def get_tokenizer(dataset):
     """_summary_
 
     Parameters
@@ -125,7 +69,7 @@ def get_tokenizer(dataset, sequence_length):
     """
     log_ds = dataset.map(lambda text, label: text)
     tokenizer_layer = tf.keras.layers.TextVectorization(
-        split="whitespace", output_mode="int", output_sequence_length=sequence_length
+        split="whitespace", output_mode="int", output_sequence_length=20
     )
     tokenizer_layer.adapt(log_ds)
     vocab_size = tokenizer_layer.vocabulary_size()

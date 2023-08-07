@@ -82,9 +82,9 @@ def main(cfg: DictConfig):
         _description_
     """
     try:
-        preprocess_and_encode(file_path=cfg, save_path=cfg)
-        preprocess_and_encode(file_path=cfg, save_path=cfg)
-        preprocess_and_encode(file_path=cfg, save_path=cfg)
+        preprocess_and_encode(file_path=cfg.files.raw.raw_train_data, save_path=cfg.files.processed.train_dataset)
+        preprocess_and_encode(file_path=cfg.files.raw.raw_valid_data, save_path=cfg.files.processed.valid_dataset)
+        preprocess_and_encode(file_path=cfg.files.raw.raw_test_data, save_path=cfg.files.processed.test_dataset)
     except Exception:
         pass
 

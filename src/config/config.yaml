@@ -3,10 +3,10 @@ files:
       raw_data: "${paths.data_raw}convolve-epoch1.zip"
       json_file: "${paths.data_raw}train.json"
       parquet_file: "${paths.data_raw}raw_parquet"
+      raw_train_data: "${paths.data_raw}raw_train_data.gzip"
+      raw_valid_data: "${paths.data_raw}raw_valid_data.gzip"
+      raw_test_data: "${paths.data_raw}raw_test_data.gzip"
       dev_zip: "${paths.dev}dev.gzip"
-      raw_train_data: "${paths.data_raw}raw_train_data"
-      raw_valid_data: "${paths.data_raw}raw_train_data"
-      raw_test_data: "${paths.data_raw}raw_train_data"
       
     processed:
       train_dataset: "${paths.data_processed}train.gzip"

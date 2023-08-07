@@ -27,7 +27,7 @@ from sklearn.model_selection import train_test_split
 from utils.logger import logger
 
 
-def unzip_file(file_path, export_path):
+def unzip_file(file_path, save_path):
     """unzip a zip file and export it at a given location
 
     Parameters
@@ -44,10 +44,10 @@ def unzip_file(file_path, export_path):
     """
 
     with zipfile.ZipFile(file_path, "r") as data_zip:
-        data_zip.extractall(export_path)
+        data_zip.extractall(save_path)
 
 
-def export_parquet(file_path, export_path):
+def export_parquet(file_path, save_path):
     """read in json file, create and adjust data which headers.
     then save and export data as parquet for efficient storage
 
@@ -65,7 +65,7 @@ def export_parquet(file_path, export_path):
     dataframe = pd.read_json(file_path, orient="index")
     dataframe.reset_index(inplace=True)
     dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
-    dataframe.to_parquet(export_path, compression="gzip")
+    dataframe.to_parquet(save_path, compression="gzip")
 
 
 def delete_json(file_path):
@@ -119,7 +119,7 @@ def load_spit(file_path, target):
     return datasets_tuple
 
 
-def save_to_parquet(dataframe, file_path):
+def save_to_parquet(dataframe, save_path):
     """save the dataframe as a parquet file
 
     Parameters
@@ -133,7 +133,7 @@ def save_to_parquet(dataframe, file_path):
     -------
         None
     """
-    dataframe.write_parquet(file=file_path, compression="gzip")
+    dataframe.write_parquet(file=save_path, compression="gzip")
     return
 
 
@@ -143,15 +143,10 @@ def main(cfg: DictConfig):
     run script
 
     """
-    # TODO remove prints statements
     logger.info("Commencing the data unzipping process.")
     try:
-        unzip_file(file_path=cfg.files.raw_data, export_path=cfg.paths.data_raw)
-        print("Stage one done")
-        export_parquet(
-            file_path=cfg.files.json_file, export_path=cfg.files.parquet_file
-        )
-        print("Stage two done")
+        unzip_file(file_path=cfg.files.raw_data, save_path=cfg.paths.data_raw)
+        export_parquet(file_path=cfg.files.json_file, save_path=cfg.files.parquet_file)
         delete_json(file_path=cfg.files.json_file)
 
         logger.success("Data has been unzipped and saved at {cfg.files.parquet_file}")
@@ -164,7 +159,7 @@ def main(cfg: DictConfig):
             cfg.files.test_dataset,
         )
         for index, dataset in enumerate(dataframes_set):
-            save_to_parquet(dataframe=dataset, file_path=dataframes_paths[index])
+            save_to_parquet(dataframe=dataset, save_path=dataframes_paths[index])
         logger.success("Data has been splitted and saved at {cfg.paths.data_processed}")
 
     except Exception:

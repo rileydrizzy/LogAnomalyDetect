@@ -80,6 +80,8 @@ def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=True):
         pl.col("Target").apply(label_encoder, return_dtype=pl.Int32)
     )
     dataframe = dataframe.with_columns(pl.col("Log").apply(clean_text_preprocess))
+    # ! alert
+    dataframe = pl.read_parquet(file_path)
     features_df = dataframe["Log"]
     target_df = dataframe["Target"]
     dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))

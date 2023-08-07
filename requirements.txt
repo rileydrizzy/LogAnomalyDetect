@@ -116,7 +116,7 @@ six==1.16.0
 smmap==5.0.0
 SQLAlchemy==2.0.19
 sqlparse==0.4.4
--e git+https://github.com/rileydrizzy/log_anomaly.git@901033b3bec196d061dac0bd3d11a9b7524511ae#egg=src
+-e git+https://github.com/rileydrizzy/log_anomaly.git@f99a1d9702abc91f6f81892bcf86336a5a5a19ba#egg=src
 stack-data==0.6.2
 sympy==1.12
 tabulate==0.9.0

@@ -1,6 +1,8 @@
 """ utils
 """
 import os
+from time import strftime
+from pathlib import Path
 import mlflow
 import polars as pl
 import tensorflow as tf
@@ -96,3 +98,21 @@ def tracking(name):
         experiment_id = mlflow.create_experiment(name)
         return experiment_id
     return experiment.experiment_id
+
+def tensorboard(model_name):
+    """_summary_
+
+    Parameters
+    ----------
+    model_name : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    model_directory = 'Tensorbord_logs/' + model_name
+    runs = strftime('run_%Y_%m_%d_%H_%M_%S')
+    log_dir = Path(model_directory, runs)
+    return log_dir

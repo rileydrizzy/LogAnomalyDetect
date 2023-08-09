@@ -166,7 +166,7 @@ data/*/*
 !.gitkeep
 
 #development area
-outputs
 dev.gzip
-artifacts/*
-logs
+
+#Hydra and Mlflows logs 
+outputs

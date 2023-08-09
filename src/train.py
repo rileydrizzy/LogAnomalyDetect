@@ -1,9 +1,10 @@
 """doc
 """
 
-import tensorflow as tf
 import mlflow
-from utils.utils import get_dataset, get_tokenizer, tracking, set_seed
+import tensorflow as tf
+
+from utils.utils import get_dataset, get_tokenizer, set_seed, tracking
 
 # TODO SET SEED
 set_seed()

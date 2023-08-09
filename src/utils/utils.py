@@ -1,13 +1,15 @@
 """ utils
 """
 import os
-from time import strftime
 from pathlib import Path
+from time import strftime
+
 import mlflow
 import polars as pl
 import tensorflow as tf
 
-def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=False):
+
+def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
     to speed up computation during training
 
@@ -33,7 +35,7 @@ def get_dataset(file_path, batch_size=100, shuffle_size=100, shuffle=False):
     dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
-    dataset = dataset.batch(batch_size).prefetch(buffer_size=tf.data.AUTOTUNE)
+    dataset = dataset.batch(batch_size).cache().prefetch(buffer_size=tf.data.AUTOTUNE)
     return dataset
 
 
@@ -99,6 +101,7 @@ def tracking(name):
         return experiment_id
     return experiment.experiment_id
 
+
 def tensorboard(model_name):
     """_summary_
 
@@ -112,7 +115,7 @@ def tensorboard(model_name):
     _type_
         _description_
     """
-    model_directory = 'Tensorbord_logs/' + model_name
-    runs = strftime('run_%Y_%m_%d_%H_%M_%S')
+    model_directory = "Tensorbord_logs/" + model_name
+    runs = strftime("run_%Y_%m_%d_%H_%M_%S")
     log_dir = Path(model_directory, runs)
     return log_dir

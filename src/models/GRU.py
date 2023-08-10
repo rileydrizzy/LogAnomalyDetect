@@ -5,7 +5,7 @@ from functools import partial
 import tensorflow as tf
 
 
-def build_model(embed_dim, vocab_size, pad):
+def build_model(vocab_size, embed_dim, Sequnce_length):
     """1DCNN doc
 
     Parameters
@@ -17,28 +17,17 @@ def build_model(embed_dim, vocab_size, pad):
     model : object
         model
     """
-    input_layer = tf.keras.layers.Input(shape=(20,))
-    embeding_layer = tf.keras.layers.Embedding(
-        input_dim=(vocab_size + 1),
-        output_dim=embed_dim,
-        input_length=20,
-        mask_zero=True,
-    )
-    DefaultConv1D = partial(
-        tf.keras.layers.Conv1D, kernel_size=3, strides=1, padding=pad, activation="relu"
-    )
-    DefualtMaxpool1D = partial(tf.keras.layers.MaxPool1D, pool_size=2)
-    model = tf.keras.Sequential(
-        [
-            input_layer,
-            embeding_layer,
-            DefaultConv1D(30),
-            DefualtMaxpool1D(),
-            tf.keras.layers.GlobalMaxPool1D(),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(units=20, activation="relu"),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(units=1, activation="sigmoid"),
-        ]
-    )
+
+    input_ = tf.keras.layers.Input(shape=(Sequnce_length,))
+    embedding_layer = tf.keras.layers.Embedding(input_dim=vocab_size, 
+                                                output_dim=embed_dim, mask_zero= True)
+    conv1D = tf.keras.layers.Conv1D(filters=10, kernel_size= 2)
+    pool = tf.keras.layers.MaxPool1D()
+    flatten = tf.keras.layers.GlobalAveragePooling1D()
+    drop1 = tf.keras.layers.Dropout(0.5)
+    dense_layer = tf.keras.layers.Dense(units =100, activation='relu')
+    drop2 = tf.keras.layers.Dropout(0.5)
+    output_layer = tf.keras.layers.Dense(1,activation='sigmoid')
+
+    model = tf.keras.Sequential([input,embedding_layer,conv1D,pool,flatten,drop1,dense_layer,drop2,output_layer])
     return model

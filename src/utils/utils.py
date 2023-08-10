@@ -8,6 +8,8 @@ import mlflow
 import polars as pl
 import tensorflow as tf
 
+def convert_label_to_float(feature, label):
+    return feature, tf.cast(label, tf.float32)
 
 def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
     """create a Tensorflow dataset, with shuffle, batching and prefetching activated
@@ -30,9 +32,11 @@ def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
         A tensorflow Dataset with features and label
     """
     dataframe = pl.read_parquet(file_path)
-    features_df = dataframe["Log"]
-    target_df = dataframe["Target"]
+    features_df = dataframe["Log"].to_numpy()
+    target_df = dataframe["Target"].to_numpy()
+
     dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))
+    dataset = dataset.map(convert_label_to_float)
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
     dataset = dataset.batch(batch_size).cache().prefetch(buffer_size=tf.data.AUTOTUNE)

@@ -166,7 +166,10 @@ data/*/*
 !.gitkeep
 
 #development area
-dev.gzip
+
 
 #Hydra and Mlflows logs 
 outputs
+mlruns
+
+.gitpod.yml

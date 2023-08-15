@@ -1,2 +1,0 @@
-
-tensorboard --logdir=path_to_your_logs

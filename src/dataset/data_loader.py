@@ -134,7 +134,6 @@ def save_to_parquet(dataframe, save_path):
         None
     """
     dataframe.write_parquet(file=save_path, compression="gzip")
-    return
 
 
 @hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")

@@ -1,5 +1,17 @@
-"""doc
+"""
+Module: Logging Utility
 
+This module provides a simple utility for logging messages to a file and the console.
+logging_utility
+
+Usage:
+- Import the module: `import logger`
+- Log messages with different levels:
+  - `logger.debug("Debug message")`
+  - `logger.info("Informational message")`
+  - `logger.warning("Warning message")`
+  - `logger.error("Error message")`
+  - `logger.critical("Critical message")`
 """
 
 from pathlib import Path

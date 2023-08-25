@@ -1,5 +1,17 @@
-""" utils
+""" 
+utils.py - Utility Functions Module
+
+This module contains a collection of utility functions designed to assist in various tasks within a data analysis 
+or machine learning project.These functions cover a range of common operations such as data preprocessing, visualization,
+and statistical analysis, aimed at enhancing the efficiency and effectiveness of the workflow.
+Functions:
+- clean_text_data(text): Clean and preprocess text data by removing special characters, lowercasing, etc.
+- visualize_stopwords_bar_chart(stopwords_dict): Plot a bar chart showcasing the frequency of stopwords in a text corpus.
+- analyze_word_frequency(text_corpus, num_top_words): Analyze and display the most frequent words in a text corpus.
+- analyze_and_plot_ngrams(text_corpus, ngram_range): Analyze and visualize n-grams within a text corpus.
+- ... (other utility functions)
 """
+
 import os
 from pathlib import Path
 from time import strftime

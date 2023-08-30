@@ -6,10 +6,7 @@ or machine learning project.These functions cover a range of common operations s
 and statistical analysis, aimed at enhancing the efficiency and effectiveness of the workflow.
 Functions:
 - clean_text_data(text): Clean and preprocess text data by removing special characters, lowercasing, etc.
-- visualize_stopwords_bar_chart(stopwords_dict): Plot a bar chart showcasing the frequency of stopwords in a text corpus.
-- analyze_word_frequency(text_corpus, num_top_words): Analyze and display the most frequent words in a text corpus.
-- analyze_and_plot_ngrams(text_corpus, ngram_range): Analyze and visualize n-grams within a text corpus.
-- ... (other utility functions)
+
 """
 
 import os
@@ -21,6 +18,20 @@ import polars as pl
 import tensorflow as tf
 
 def convert_label_to_float(feature, label):
+    """_summary_
+
+    Parameters
+    ----------
+    feature : _type_
+        _description_
+    label : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     return feature, tf.cast(label, tf.float32)
 
 def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):

@@ -1,6 +1,3 @@
-"""doc
-"""
-
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as f:
@@ -9,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 __version__ = "0.0.0"
 
-REPO_NAME = "log_anomaly"
+REPO_NAME = "LogAnomalyDetect"
 AUTHOR_USER_NAME = "rileydrizzy"
 SRC_REPO = "src"
 AUTHOR_EMAIL = "ipadeolaoladipo@outlook.com"
@@ -20,7 +17,7 @@ setuptools.setup(
     version=__version__,
     license="MIT",
     author=AUTHOR_USER_NAME,
-    description="Repo Setup Template",
+    description="A machine learning model to predict log of softwares",
     long_description=long_description,
     long_description_content="text/markdown",
     url=f"https://github.com/{AUTHOR_USER_NAME}/{REPO_NAME}",

@@ -1,7 +1,5 @@
 # PROJECT / BUSINESS UNDERSTANDING
 
-***TEMPORARY README***
-
 In the realm of computing, logging involves the process of creating a record detailing events that transpire within a computer system. These events encompass issues, errors, or even informative updates about ongoing operations. These occurrences might manifest within the operating system or other software components. For every such event, a message or entry is documented.
 
 The project, ‘Log Anomaly Detection’, centres on identifying irregularities within logs produced by software by utilising Machine Learning techniques.

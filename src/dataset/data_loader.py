@@ -1,169 +1,183 @@
-""""
-This script perform the data unloading steps. The zip file is unzipped, as a json file.
-The json file is loaded to pandas Dataframe and then the data is export as a parquet file
-for efficient storage.
-Data(parquet file) is read and splitted into train, valid and test datasets using a 80:10:10 ratio. 
-The data was splitted using stratfied strategy to account for the class imbalanced
-and then each dataset was then save as a parquet for efficient storage.
-
-functions:
-    *unzip_file - unzip the zip file and export it
-    *export_parquet - read in json file and export file as parquet
-    *delete_json - deletes the unused json file, to clean storage
-    *load_split - load and split the dataset into train, valid and test set
-    *save_to_parquet - save and export dataset as parquet
-    *main - the main function to run the script
-
+"""doc
 """
-import zipfile
-from pathlib import Path
+
+import re
+import string
 
 import hydra
-import pandas as pd
+import nltk
 import polars as pl
+import tensorflow as tf
+from nltk.corpus import stopwords
 from omegaconf import DictConfig
-from sklearn.model_selection import train_test_split
+from src.utils.logging import logger
 
-from utils.logger import logger
+nltk.download("stopwords")
 
 
-def unzip_file(file_path, save_path):
-    """unzip a zip file and export it at a given location
-
-    Parameters
-    ----------
-    file_path : str, Path object
-        The file path of the zip file
-    export_path : str
-        The path where to export the unzip the file
+def clean_text(text_row):
+    """performs preprocessing steps on each text row removing numbers,
+    stopwords, punctuation and any symbols
 
     Returns
     -------
-        None
-
+    clean_text : row
+        A cleaned and preprocessed text
     """
 
-    with zipfile.ZipFile(file_path, "r") as data_zip:
-        data_zip.extractall(save_path)
+    text_row = text_row.lower()
+    text_row = re.sub("<[^>]*>", "", text_row)
+    text_row = re.sub(r"[^a-zA-Z\s]", "", text_row)
+    stop_words = set(stopwords.words("english"))
+    text_row = [
+        word
+        for word in text_row.split()
+        if word not in stop_words and word not in string.punctuation
+    ]
+    cleaned_text = " ".join(word for word in text_row)
+    return cleaned_text
 
 
-def export_parquet(file_path, save_path):
-    """read in json file, create and adjust data which headers.
-    then save and export data as parquet for efficient storage
-
-    Parameters
-    ----------
-    file_path : str, Path object
-        The file path of the json file
-    export_path : str
-        The path where to export the parquet file
+def label_encoder(target_df):
+    """performs label encoding for target label
 
     Returns
     -------
-        None
+    label : int
+        return either 0 for normal or 1 for abnormal
     """
-    dataframe = pd.read_json(file_path, orient="index")
-    dataframe.reset_index(inplace=True)
-    dataframe.rename(columns={0: "Target", "index": "Log"}, inplace=True)
-    dataframe.to_parquet(save_path, compression="gzip")
+
+    if target_df == "normal":
+        label = 0
+    else:
+        label = 1
+    return label
 
 
-def delete_json(file_path):
-    """Delete the unused json file to free up storage space
+def preprocess_and_encode(file_path, save_path):
+    """_summary_
 
     Parameters
     ----------
-    file_path : str, Path object
-        The file path of the json file
-
-    Returns
-    -------
-        None
+    file_path : _type_
+        _description_
+    save_path : _type_
+        _description_
     """
-    file_path = Path(file_path)
-    try:
-        if file_path.exists() and file_path.is_file():
-            file_path.unlink()
-
-    except FileNotFoundError:
-        pass
-
-
-def load_spit(file_path, target):
-    """create dataframe and split the data into train, valid and test set,
-    in a 80:10:10 ratio.
-    The data will be splitted using stratified strategy to account for the class imbalanced
-
-    Parameters
-    ----------
-    file_path : str, Path object
-        The file path of the file
-    target : str
-        The column name of the target
-
-    Returns
-    -------
-    new_data : tuple
-        A tuple containing the train_data, valid_data, test_data in that order
-    """
-
-    datarame = pl.read_parquet(file_path)
-
-    train_data, data = train_test_split(
-        datarame, random_state=42, test_size=0.2, stratify=datarame[target]
+    dataframe = pl.read_parquet(file_path)
+    dataframe = dataframe.with_columns(
+        pl.col("Target").apply(label_encoder, return_dtype=pl.Int16)
     )
-    valid_data, test_data = train_test_split(
-        data, random_state=42, test_size=0.5, stratify=data[target]
-    )
-    datasets_tuple = (train_data, valid_data, test_data)
-    return datasets_tuple
-
-
-def save_to_parquet(dataframe, save_path):
-    """save the dataframe as a parquet file
-
-    Parameters
-    ----------
-    dataframe : dataframe
-        A dataframe
-    file_path : str. Path object
-        The path where to export the parquet
-
-    Returns
-    -------
-        None
-    """
+    dataframe = dataframe.with_columns(pl.col("Log").apply(clean_text))
     dataframe.write_parquet(file=save_path, compression="gzip")
+
+
+def get_tokenizer(dataset):
+    """_summary_
+
+    Parameters
+    ----------
+    dataset : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    log_ds = dataset.map(lambda text, label: text)
+    tokenizer_layer = tf.keras.layers.TextVectorization(
+        split="whitespace", output_mode="int", output_sequence_length=20
+    )
+    tokenizer_layer.adapt(log_ds)
+    vocab_size = tokenizer_layer.vocabulary_size()
+
+    return tokenizer_layer, vocab_size
+
+
+def convert_label_to_float(feature, label):
+    """_summary_
+
+    Parameters
+    ----------
+    feature : _type_
+        _description_
+    label : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    return feature, tf.cast(label, tf.float32)
+
+
+def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
+    """create a Tensorflow dataset, with shuffle, batching and prefetching activated
+    to speed up computation during training
+
+    Parameters
+    ----------
+    file_path : str
+        path of the parquet file
+    batch_size : int
+        Batch size
+    shuffle_size : int
+        Size of the buffer for shuffle
+    shuffle : bool, Default = True
+        perform shuffle on the dataset, if false it doesn't
+
+    Returns
+    -------
+    dataset : Dataset
+        A tensorflow Dataset with features and label
+    """
+    dataframe = pl.read_parquet(file_path)
+    features_df = dataframe["Log"].to_numpy()
+    target_df = dataframe["Target"].to_numpy()
+
+    dataset = tf.data.Dataset.from_tensor_slices((features_df, target_df))
+    # dataset = dataset.map(convert_label_to_float)
+    if shuffle:
+        dataset = dataset.shuffle(shuffle_size)
+    dataset = dataset.batch(batch_size).cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+    return dataset
 
 
 @hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")
 def main(cfg: DictConfig):
-    """
-    run script
+    """_summary_
 
+    Parameters
+    ----------
+    cfg : DictConfig
+        _description_
     """
-    logger.info("Commencing the data unzipping process.")
+
     try:
-        unzip_file(file_path=cfg.files.raw.raw_data, save_path=cfg.paths.data_raw)
-        export_parquet(file_path=cfg.files.raw.json_file, save_path=cfg.files.raw.parquet_file)
-        delete_json(file_path=cfg.files.raw.json_file)
-
-        logger.success(f"Data has been unzipped and saved at {cfg.files.raw.parquet_file}")
-        logger.info("Initiating the data splitting procedure.")
-
-        dataframes_set = load_spit(file_path=cfg.files.raw.parquet_file, target="Target")
-        dataframes_paths = (
-            cfg.files.raw.raw_train_data,
-            cfg.files.raw.raw_valid_data,
-            cfg.files.raw.raw_test_data,
+        logger.info("Commencing preprocessing and saving of Train data")
+        preprocess_and_encode(
+            file_path=cfg.files.raw.raw_train_data,
+            save_path=cfg.files.processed.train_dataset,
         )
-        for index, dataset in enumerate(dataframes_set):
-            save_to_parquet(dataframe=dataset, save_path=dataframes_paths[index])
-        logger.success(f"Data has been splitted and saved at directory {cfg.paths.data_processed}")
-
-    except Exception:
-        logger.exception("Data unloading was unsuccesfully")
+        logger.success("Train data has been preprocessed and saved")
+        logger.info("Commencing preprocessing and saving of Valid data")
+        preprocess_and_encode(
+            file_path=cfg.files.raw.raw_valid_data,
+            save_path=cfg.files.processed.valid_dataset,
+        )
+        logger.success("Valid data has been preprocessed and saved")
+        logger.info("Commencing preprocessing and saving of Test data")
+        preprocess_and_encode(
+            file_path=cfg.files.raw.raw_test_data,
+            save_path=cfg.files.processed.test_dataset,
+        )
+        logger.success("Test data has been preprocessed and saved")
+    except Exception as error:
+        logger.exception(f"Preporcessing stage failed due to {error}")
 
 
 if __name__ == "__main__":
     main()
+    logger.success("Data has been processed, cleaned and saved")

@@ -17,3 +17,9 @@ paths:
   data_raw: ${hydra:runtime.cwd}/data/raw/
   data_processed: ${hydra:runtime.cwd}/data/processed/
   dev: ${hydra:runtime.cwd}/dev/
+
+params:
+  batch_size: 32
+  total_epochs: 2
+
+model_name:

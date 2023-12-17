@@ -168,7 +168,8 @@ data/*/*
 #development area
 
 
-#Hydra and Mlflows logs 
+#Hydra logger ,and Mlflows logs 
 outputs
 mlruns
+logs
 .gitpod.yml

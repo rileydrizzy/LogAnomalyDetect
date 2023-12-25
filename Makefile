@@ -7,15 +7,8 @@ help:
 
 install:
 	@echo "Installing..."
-	python -m pip install -r requirements.txt
-	pip install pre-commit
+	. ./run_setup.sh
 	pre-commit install
-	
-activate:
-	@echo "Activating virtual environment"
-	source env/bin/activate
-
-setup: install
 
 precommit:
 	@echo "Running precommit on all files"
@@ -24,7 +17,3 @@ precommit:
 export:
 	@echo "Exporting dependencies to requirements file"
 	python -m pip freeze > requirements.txt
-
-force backup: # To push to Github without running precommit
-	git commit --no-verify -m "backup"
-	git push origin main

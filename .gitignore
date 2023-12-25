@@ -173,3 +173,5 @@ outputs
 mlruns
 logs
 .gitpod.yml
+
+environ_variables.sh

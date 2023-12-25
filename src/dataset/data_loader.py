@@ -10,7 +10,7 @@ import polars as pl
 import tensorflow as tf
 from nltk.corpus import stopwords
 from omegaconf import DictConfig
-from src.utils.logging import logger
+from utils.logging import logger
 
 nltk.download("stopwords")
 
@@ -72,7 +72,10 @@ def preprocess_and_encode(file_path, save_path):
     dataframe.write_parquet(file=save_path, compression="gzip")
 
 
-def get_tokenizer(dataset):
+def get_vectorization_layer(
+    dataset,
+    max_length=None,
+):
     """_summary_
 
     Parameters
@@ -86,13 +89,13 @@ def get_tokenizer(dataset):
         _description_
     """
     log_ds = dataset.map(lambda text, label: text)
-    tokenizer_layer = tf.keras.layers.TextVectorization(
+    vectorization_layer = tf.keras.layers.TextVectorization(
         split="whitespace", output_mode="int", output_sequence_length=20
     )
-    tokenizer_layer.adapt(log_ds)
-    vocab_size = tokenizer_layer.vocabulary_size()
+    vectorization_layer.adapt(log_ds)
+    vocab_size = vectorization_layer.vocabulary_size()
 
-    return tokenizer_layer, vocab_size
+    return vectorization_layer, vocab_size
 
 
 def convert_label_to_float(feature, label):

@@ -36,9 +36,8 @@ def main(cfg: DictConfig):
         logger.info("Commencing training process")
         set_seed()
         experiment_id = set_mlflow_tracking(cfg.model_name)
-        logger.info("")
-        tensorb_dir = tensorboard_dir(cfg.model_name)
-        tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=tensorb_dir)
+        model_tensorb_dir = tensorboard_dir(cfg.model_name)
+        tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=model_tensorb_dir)
         callbacks_list.append(tensorboard_cb)
 
         logger.info("Retrieving the dataset for training and validation sets")

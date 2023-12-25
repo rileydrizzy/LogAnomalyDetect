@@ -3,26 +3,29 @@
 
 import hydra
 import mlflow
+import tensorboard
 import tensorflow as tf
 from omegaconf import DictConfig
-from utils.logging import logger
+
+from dataset.dataset_loader import get_dataset, get_vectorization_layer
 from models.model_loader import ModelLoader
-from dataset.data_loader import get_dataset, get_vectorization_layer
-from utils.common_utils import (
-    set_seed,
-    set_mlflow_tracking,
-    tensorboard_dir,
-    get_device_strategy,
-)
-import tensorboard
+from utils.common_utils import (get_device_strategy, set_mlflow_tracking,
+                                set_seed, tensorboard_dir)
+from utils.logging import logger
 
 # TODO remove dev data from code
 # TODO LOSS, OPTIM
 loss = tf.keras.losses.BinaryCrossentropy()
 optim = tf.keras.optimizers.Adam(learning_rate=0.01)
-checkpoints_cb = tf.keras.callbacks.ModelCheckpoint("my_checkpoints", save_best_only= True,)
-early_stopping_cb = tf.keras.callbacks.EarlyStopping(patience= 10, restore_best_weights= True)
+checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
+    "my_checkpoints",
+    save_best_only=True,
+)
+early_stopping_cb = tf.keras.callbacks.EarlyStopping(
+    patience=10, restore_best_weights=True
+)
 callbacks_list = [checkpoints_cb, early_stopping_cb]
+
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):
@@ -63,21 +66,23 @@ def main(cfg: DictConfig):
         ):
             mlflow.set_tag("model_name", cfg.model_name)
 
-        #with strategy.scope():
-            tokenizer, vocab_size = get_vectorization_layer(dataset=train_data)
-            model = load_model_func(
-                vectorization_layer=tokenizer, embedding_vocab=vocab_size
-            )
-            model.compile(loss=loss, optimizer=optim)
-            logger.info(f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs")
-            model.fit(
-                train_data,
-                validation_data=valid_data,
-                epochs=cfg.params.total_epochs,
-                callbacks=callbacks_list,
-                class_weight=None,
-            )
-        logger.success("Training Job completed")
+            with strategy.scope():
+                tokenizer, vocab_size = get_vectorization_layer(dataset=train_data)
+                model = load_model_func(
+                    vectorization_layer=tokenizer, embedding_vocab=vocab_size
+                )
+                model.compile(loss=loss, optimizer=optim)
+                logger.info(
+                    f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs"
+                )
+                model.fit(
+                    train_data,
+                    validation_data=valid_data,
+                    epochs=cfg.params.total_epochs,
+                    callbacks=callbacks_list,
+                    class_weight=None,
+                )
+            logger.success("Training Job completed")
     except Exception as error:
         logger.exception(f"Training failed due to -> {error}.")
 

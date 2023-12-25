@@ -43,9 +43,10 @@ def set_mlflow_tracking(model_name):
     Returns
     -------
     int
-        _description_
+        _description_ mlflow.set_tracking_uri('https://dagshub.com/<DagsHub-user-name>/<repository-name>.mlflow')
+
     """
-    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+    mlflow.set_tracking_uri("https://dagshub.com/rileydrizzy/log_anomaly.mlflow")
     experiment = mlflow.get_experiment_by_name(model_name)
     if experiment is None:
         experiment_id = mlflow.create_experiment(model_name)

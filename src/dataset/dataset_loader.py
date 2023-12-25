@@ -10,6 +10,7 @@ import polars as pl
 import tensorflow as tf
 from nltk.corpus import stopwords
 from omegaconf import DictConfig
+
 from utils.logging import logger
 
 nltk.download("stopwords")

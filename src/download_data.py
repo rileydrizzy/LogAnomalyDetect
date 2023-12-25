@@ -24,8 +24,8 @@ import polars as pl
 from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
 
-from src.utils.common_utils import set_seed
-from src.utils.logging import logger
+from utils.common_utils import set_seed
+from utils.logging import logger
 
 
 def unzip_file(file_path, save_path):
@@ -137,7 +137,7 @@ def save_to_parquet(dataframe, save_path):
     dataframe.write_parquet(file=save_path, compression="gzip")
 
 
-@hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")
+@hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):
     """
     run script

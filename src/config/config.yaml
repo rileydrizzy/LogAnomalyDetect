@@ -19,8 +19,9 @@ paths:
   dev: ${hydra:runtime.cwd}/dev/
 
 params:
-  batch_size: 32
+  batch_size: 512
   total_epochs: 2
+  learning_rate: 0.01
 
 model_name:
   "1DCNN"

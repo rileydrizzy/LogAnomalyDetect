@@ -149,7 +149,7 @@ def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
     return dataset
 
 
-@hydra.main(config_name="data_config", config_path="dataset_config", version_base="1.2")
+@hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):
     """_summary_
 

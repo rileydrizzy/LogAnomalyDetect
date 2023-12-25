@@ -173,5 +173,7 @@ outputs
 mlruns
 logs
 .gitpod.yml
-
+Tensorbord_logs
 environ_variables.sh
+model_checkpoints
+model_artifact

@@ -3,22 +3,17 @@
 
 import hydra
 import mlflow
-import tensorboard
 import tensorflow as tf
 from omegaconf import DictConfig
 
-from dataset.dataset_loader import get_dataset, get_vectorization_layer
+from dataset_loader import get_dataset, get_vectorization_layer
 from models.model_loader import ModelLoader
 from utils.common_utils import (get_device_strategy, set_mlflow_tracking,
                                 set_seed, tensorboard_dir)
 from utils.logging import logger
 
-# TODO remove dev data from code
-# TODO LOSS, OPTIM
-loss = tf.keras.losses.BinaryCrossentropy()
-optim = tf.keras.optimizers.Adam(learning_rate=0.01)
 checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
-    "my_checkpoints",
+    "model_checkpoints",
     save_best_only=True,
 )
 early_stopping_cb = tf.keras.callbacks.EarlyStopping(
@@ -45,11 +40,14 @@ def main(cfg: DictConfig):
 
         logger.info("Retrieving the dataset for training and validation sets")
         train_data = get_dataset(
-            file_path="development/clean_dev.gzip",
+            file_path=cfg.files.processed.train_dataset,
             batch_size=cfg.params.batch_size,
             shuffle=True,
         )
-        valid_data = get_dataset(file_path="development/clean_dev.gzip")
+        valid_data = get_dataset(
+            file_path=cfg.files.processed.valid_dataset,
+            batch_size=cfg.params.batch_size,
+        )
 
         logger.info("Retrieving the training strategy.")
         strategy, device = get_device_strategy()
@@ -59,6 +57,8 @@ def main(cfg: DictConfig):
 
         logger.info(f"Retrieving the model: {cfg.model_name}")
         load_model_func = ModelLoader().get_model(cfg.model_name)
+        loss = tf.keras.losses.BinaryCrossentropy()
+        optim = tf.keras.optimizers.Adam(learning_rate=cfg.params.learning_rate)
 
         mlflow.tensorflow.autolog(log_datasets=False)
         with mlflow.start_run(
@@ -82,6 +82,10 @@ def main(cfg: DictConfig):
                     callbacks=callbacks_list,
                     class_weight=None,
                 )
+            logger.info(f"Saving Trained {cfg.model_name} Model")
+            mlflow.tensorflow.log_model(
+                model, artifact_path=f"model_artifact/{cfg.model_name}"
+            )
             logger.success("Training Job completed")
     except Exception as error:
         logger.exception(f"Training failed due to -> {error}.")

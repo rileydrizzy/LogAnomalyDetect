@@ -8,8 +8,12 @@ from omegaconf import DictConfig
 
 from dataset_loader import get_dataset, get_vectorization_layer
 from models.model_loader import ModelLoader
-from utils.common_utils import (get_device_strategy, set_mlflow_tracking,
-                                set_seed, tensorboard_dir)
+from utils.common_utils import (
+    get_device_strategy,
+    set_mlflow_tracking,
+    set_seed,
+    tensorboard_dir,
+)
 from utils.logging import logger
 
 checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
@@ -83,8 +87,10 @@ def main(cfg: DictConfig):
                     class_weight=None,
                 )
             logger.info(f"Saving Trained {cfg.model_name} Model")
-            mlflow.tensorflow.log_model(
-                model, artifact_path=f"model_artifact/{cfg.model_name}"
+            mlflow.keras.log_model(
+                keras_model=model,
+                artifact_path=f"model_artifact/{cfg.model_name}",
+                registered_model_name=f"{cfg.model_name}",
             )
             logger.success("Training Job completed")
     except Exception as error:

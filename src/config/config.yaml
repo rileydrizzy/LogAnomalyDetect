@@ -20,7 +20,7 @@ paths:
 
 params:
   batch_size: 512
-  total_epochs: 2
+  total_epochs: 1
   learning_rate: 0.01
 
 model_name:

@@ -1,8 +1,14 @@
-""" 
+"""
 Utility Functions Module
 
 Functions:
-- set_seed(): 
+- set_seed(seed=42): Set random seed for reproducibility.
+
+- set_mlflow_tracking(model_name): Set up MLflow experiment tracking.
+
+- tensorboard_dir(model_name): Generate directory for TensorBoard logs.
+
+- get_device_strategy(): Get TensorFlow distribution strategy based on available devices.
 """
 
 import os
@@ -14,14 +20,13 @@ import tensorflow as tf
 
 
 def set_seed(seed=42):
-    """_summary_
+    """Set random seed for reproducibility.
 
     Parameters
     ----------
     seed : int, optional
-        _description_, by default 42
+        Random seed value, by default 42.
     """
-
     tf.experimental.numpy.random.seed(seed)
     tf.keras.utils.set_random_seed(seed)
     # When running on the CuDNN backend, two further options must be set
@@ -33,18 +38,21 @@ def set_seed(seed=42):
 
 
 def set_mlflow_tracking(model_name):
-    """_summary_
+    """Set up MLflow experiment tracking.
 
     Parameters
     ----------
-    name : str
-        _description_
+    model_name : str
+        Name of the model.
 
     Returns
     -------
     int
-        _description_ mlflow.set_tracking_uri('https://dagshub.com/<DagsHub-user-name>/<repository-name>.mlflow')
+        Experiment ID for MLflow tracking.
 
+    Notes
+    -----
+    The function assumes a DagsHub-specific MLflow tracking URI.
     """
     mlflow.set_tracking_uri("https://dagshub.com/rileydrizzy/log_anomaly.mlflow")
     experiment = mlflow.get_experiment_by_name(model_name)
@@ -55,17 +63,17 @@ def set_mlflow_tracking(model_name):
 
 
 def tensorboard_dir(model_name):
-    """_summary_
+    """Generate directory for TensorBoard logs.
 
     Parameters
     ----------
-    model_name : _type_
-        _description_
+    model_name : str
+        Name of the model.
 
     Returns
     -------
-    _type_
-        _description_
+    pathlib.Path
+        Path to the directory for TensorBoard logs.
     """
     model_directory = "Tensorbord_logs/" + model_name
     runs = strftime("run_%Y_%m_%d_%H_%M_%S")
@@ -74,15 +82,16 @@ def tensorboard_dir(model_name):
 
 
 def get_device_strategy():
-    """_summary_
+    """Get TensorFlow distribution strategy based on available devices.
 
     Returns
     -------
-    _type_
-        _description_
+    tuple
+        - tf.distribute.Strategy: TensorFlow distribution strategy.
+        - str: Description of the available device ('GPU' or 'CPU').
     """
     if tf.test.gpu_device_name():
         strategy = tf.distribute.MirroredStrategy()
-        return strategy, "GPU"
+        return (strategy, "GPU")
     strategy = tf.distribute.OneDeviceStrategy(device="/device:CPU:0")
-    return strategy, "CPU"
+    return (strategy, "CPU")

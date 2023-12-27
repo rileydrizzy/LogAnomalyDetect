@@ -11,6 +11,13 @@ from src.dataset_loader import get_dataset, get_vectorization_layer
 from utils.common_utils import set_seed
 from utils.logging import logger
 
+client = mlflow.MlflowClient()
+
+name = cfg.model_name
+version = client.get_latest_versions(name=name)[0].version
+model_uri = f'models:/{name}/{version}'
+
+model = mlflow.keras.load_model(model_uri)
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):

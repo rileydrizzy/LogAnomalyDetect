@@ -118,7 +118,7 @@ Pillow==10.1.0
 platformdirs==3.11.0
 polars==0.20.2
 pre-commit==3.6.0
-protobuf==4.25.1
+protobuf>=4.20.1
 pyarrow==14.0.2
 pyasn1==0.5.1
 pyasn1-modules==0.3.0

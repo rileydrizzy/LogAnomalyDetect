@@ -165,15 +165,18 @@ cython_debug/
 data/*/*
 !.gitkeep
 
-#development area
+#devops
+.gitpod.yml
 
-
-#Hydra logger ,and Mlflows logs 
+# Logs Directories 
 outputs
 mlruns
 logs
-.gitpod.yml
 Tensorbord_logs
-environ_variables.sh
+
+#
 model_checkpoints
 model_artifact
+
+# Environment variables and keys
+environ_variables.sh

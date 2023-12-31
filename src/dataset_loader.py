@@ -9,25 +9,24 @@ Functions:
 - preprocess_and_encode(file_path: str, save_path: str): Preprocesses and encodes data,\
     saving the result.
 
-- get_vectorization_layer(dataset: Dataset, max_length: Optional[int] = None) -> Tuple[TextVectorization, int]: Creates a text vectorization layer.
+- get_vectorization_layer(dataset: Dataset, max_length: Optional[int] = None): \
+    Creates a text vectorization layer.
 
-- convert_label_to_float(feature: str, label: int) -> Tuple[str, tf.Tensor]: Converts labels to float.
+- convert_label_to_float(feature: str, label: int): Converts labels to float.
 
-- get_dataset(file_path: str, batch_size: int = 2, shuffle_size: int = 100, shuffle: bool = False) -> Dataset: Creates a TensorFlow dataset with batching and prefetching.
+- get_dataset(file_path: str, batch_size: int = 2, \
+    shuffle_size: int = 100, shuffle: bool = False): \
+    Creates a TensorFlow dataset with batching and prefetching.
 
-- main(cfg: DictConfig): Main function for preprocessing data according to the provided configuration.
+- main(cfg: DictConfig): Main function for preprocessing data according to the provided configuration
 
-Example Usage:
-    ```python
-    # Preprocess and encode data
-    preprocess_and_encode(file_path="raw_data.parquet", save_path="processed_data.parquet")
-    
-    # Create a TensorFlow dataset
-    dataset = get_dataset(file_path="processed_data.parquet", batch_size=32, shuffle=True)
+Example:
+    ```bash
+    python src/dataset_loader.py
     ```
-
 Note:
-    The module assumes the existence of a configuration file named 'config.yaml' with the required parameters.
+    The module assumes the existence of a configuration file named 'config.yaml'\
+        with the required parameters.
 """
 
 import re
@@ -48,7 +47,8 @@ nltk.download("stopwords")
 def clean_text(text_row: str):
     """Preprocesses and cleans a text row.
 
-    Returns:
+    Returns
+    -------
     - str: A cleaned and preprocessed text.
     """
 
@@ -68,10 +68,11 @@ def clean_text(text_row: str):
 def label_encoder(target_df: str):
     """Performs label encoding for target labels.
 
-    Returns:
-    - int: Encoded label (0 for 'normal', 1 for 'abnormal').
+    Returns
+    -------
+    label : int
+        Encoded label (0 for 'normal', 1 for 'abnormal')
     """
-
     if target_df == "normal":
         label = 0
     else:
@@ -82,9 +83,12 @@ def label_encoder(target_df: str):
 def preprocess_and_encode(file_path: str, save_path: str):
     """Preprocesses and encodes data, saving the result.
 
-    Parameters:
-    - file_path (str): Path of the input parquet file.
-    - save_path (str): Path to save the processed data.
+    Parameters
+    ----------
+    file_path : str
+        Path of the input parquet file.
+    save_path : str
+        Path to save the processed data
     """
     dataframe = pl.read_parquet(file_path)
     dataframe = dataframe.with_columns(
@@ -97,12 +101,17 @@ def preprocess_and_encode(file_path: str, save_path: str):
 def get_vectorization_layer(dataset: tf.data.Dataset, max_length: int = None):
     """Creates a text vectorization layer.
 
-    Parameters:
-    - dataset (tf.data.Dataset): TensorFlow dataset containing text data.
-    - max_length (Optional[int]): Maximum sequence length, by default None.
+    Parameters
+    ----------
+    dataset : tf.data.Dataset
+        TensorFlow dataset containing text data.
+    max_length : int, optional
+         Maximum sequence length, by default None.
 
-    Returns:
-    - Tuple[tf.keras.layers.TextVectorization, int]: Vectorization layer and vocabulary size.
+    Returns
+    -------
+    Tuple[tf.keras.layers.TextVectorization, int]
+        Vectorization layer and vocabulary size.
     """
     log_ds = dataset.map(lambda text, label: text)
     vectorization_layer = tf.keras.layers.TextVectorization(
@@ -117,12 +126,17 @@ def get_vectorization_layer(dataset: tf.data.Dataset, max_length: int = None):
 def convert_label_to_float(feature: str, label: int):
     """Converts labels to float.
 
-    Parameters:
-    - feature (str): Text feature.
-    - label (int): Integer label.
+    Parameters
+    ----------
+    feature : str
+        Text feature.
+    label : int
+        Integer label.
 
-    Returns:
-    - Tuple[str, tf.Tensor]: Text feature and float label.
+    Returns
+    -------
+    Tuple[str, tf.Tensor]
+        Text feature and float label.
     """
     return feature, tf.cast(label, tf.float32)
 
@@ -130,17 +144,26 @@ def convert_label_to_float(feature: str, label: int):
 def get_dataset(
     file_path: str, batch_size: int = 2, shuffle_size: int = 100, shuffle: bool = False
 ):
-    """Creates a TensorFlow dataset with batching and prefetching.
-
-    Parameters:
-    - file_path (str): Path of the parquet file.
-    - batch_size (int): Batch size.
-    - shuffle_size (int): Size of the buffer for shuffle.
-    - shuffle (bool): Perform shuffle on the dataset, by default False.
-
-    Returns:
-    - tf.data.Dataset: A TensorFlow Dataset with features and label.
     """
+    Creates a TensorFlow dataset with batching and prefetching.
+
+    Parameters
+    ----------
+    file_path : str
+        Path of the parquet file.
+    batch_size : int, optional
+        Batch size, by default 2
+    shuffle_size : int, optional
+        Size of the buffer for shuffle, by default 100
+    shuffle : bool, optional
+        Perform shuffle on the dataset, by default False, by default False
+
+    Returns
+    -------
+    tf.data.Dataset
+        A TensorFlow Dataset with features and label
+    """
+
     dataframe = pl.read_parquet(file_path)
     features_df = dataframe["Log"].to_numpy()
     target_df = dataframe["Target"].to_numpy()

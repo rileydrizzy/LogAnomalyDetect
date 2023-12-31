@@ -6,14 +6,21 @@ Data(parquet file) is read and splitted into train, valid and test datasets usin
 The data was splitted using stratfied strategy to account for the class imbalanced
 and then each dataset was then save as a parquet for efficient storage.
 
-functions:
-    *unzip_file - unzip the zip file and export it
+Functions:
+    -`unzip_file` - unzip the zip file and export it
     *export_parquet - read in json file and export file as parquet
     *delete_json - deletes the unused json file, to clean storage
     *load_split - load and split the dataset into train, valid and test set
     *save_to_parquet - save and export dataset as parquet
     *main - the main function to run the script
 
+Example:
+    ```bash
+    python src/download_data.py
+    ```
+Note:
+    The module assumes the existence of a configuration file named 'config.yaml'\
+        with the required parameters.
 """
 import zipfile
 from pathlib import Path
@@ -139,10 +146,19 @@ def save_to_parquet(dataframe, save_path):
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(cfg: DictConfig):
-    """
-    run script
+    """The main function to run the script
 
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration settings provided by Hydra.
+
+    Notes
+    -----
+    The function performs the unzipping and saving of data into train, validation, and test data sets.
+    The each dataset is saved according to the specified file paths in the configuration.
     """
+
     logger.info("Commencing the data unzipping process.")
     try:
         set_seed()
@@ -172,7 +188,7 @@ def main(cfg: DictConfig):
         )
 
     except Exception as error:
-        logger.exception("fData unloading was unsuccesfully due to {error}")
+        logger.exception(f"Data unloading was unsuccesfully due to {error}")
 
 
 if __name__ == "__main__":

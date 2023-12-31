@@ -5,7 +5,7 @@ help:
 	@echo "    install              desc of the command install"
 
 
-install:
+setup:
 	@echo "Installing..."
 	. ./run_setup.sh
 	pre-commit install

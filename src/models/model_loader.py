@@ -1,7 +1,7 @@
 """Model Loader Module
 
 This module defines a `ModelLoader` class responsible for loading different TensorFlow models 
-based on their names.The available models and their associated build functions are specified in 
+based on their names. The available models and their associated build functions are specified in 
 the `models` dictionary.
 
 Classes:
@@ -28,11 +28,12 @@ Note:
 
 from models.baseline_cnn import build_model
 
+
 class ModelLoader:
     """Class for Loading TensorFlow Models"""
 
     def __init__(self):
-        self.models = {"1DCNN": build_model, "test_model": None}
+        self.models = {"1DCNN": build_model}
 
     def get_model(self, model_name: str) -> object:
         """Build and Retrieve a TensorFlow Model Instance.
@@ -47,5 +48,8 @@ class ModelLoader:
         - ValueError: If the specified model is not in the model list.
         """
         if model_name in self.models:
-            return self.models[model_name]
-        raise ValueError(f"Model '{model_name}' is not in the model list.")
+            return self.models[model_name]()
+        raise ValueError(
+            f"Model '{model_name}' is not in the model list. Available models:\
+                {list(self.models.keys())}"
+        )

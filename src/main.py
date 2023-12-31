@@ -22,12 +22,6 @@ Example:
     ```bash
     python src/main.py
     ```
-
-Note:
-    Ensure the required Python packages are installed before running the script:
-    ```bash
-    pip install mlflow tensorflow hydra-core
-    ```
 """
 
 
@@ -101,7 +95,7 @@ def main(cfg: DictConfig):
 
         logger.info(f"Retrieving the model: {cfg.model_name}")
         load_model_func = ModelLoader().get_model(cfg.model_name)
-        loss = tf.keras.losses.BinaryCrossentropy()
+        loss_func = tf.keras.losses.BinaryCrossentropy()
         optim = tf.keras.optimizers.Adam(learning_rate=cfg.params.learning_rate)
 
         # Enable MLflow autologging
@@ -119,7 +113,7 @@ def main(cfg: DictConfig):
                 model = load_model_func(
                     vectorization_layer=tokenizer, embedding_vocab=vocab_size
                 )
-                model.compile(loss=loss, optimizer=optim)
+                model.compile(loss=loss_func, optimizer=optim)
                 logger.info(
                     f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs"
                 )

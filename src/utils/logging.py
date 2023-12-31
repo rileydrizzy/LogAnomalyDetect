@@ -12,6 +12,7 @@ Usage:
   - `logger.warning("Warning message")`
   - `logger.error("Error message")`
   - `logger.critical("Critical message")`
+  - `logger.exception("Exception Error")`
 """
 
 from pathlib import Path

@@ -22,6 +22,7 @@ params:
   batch_size: 512
   total_epochs: 1
   learning_rate: 0.01
+  cm_threshold: 0.5
 
 model_name:
   "1DCNN"

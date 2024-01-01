@@ -38,6 +38,8 @@ from utils.common_utils import (
     set_mlflow_tracking,
     set_seed,
     tensorboard_dir,
+    plot_confusion_matrix,
+    plot_precision_recall_curve,
 )
 from utils.logging import logger
 
@@ -49,7 +51,13 @@ checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
 early_stopping_cb = tf.keras.callbacks.EarlyStopping(
     patience=10, restore_best_weights=True
 )
-callbacks_list = [checkpoints_cb, early_stopping_cb]
+reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor="val_loss", factor=0.2, patience=5, verbose=1
+)
+callbacks_list = [checkpoints_cb, early_stopping_cb, reduce_lr]
+
+# Directory to save plots.
+PLOTS_DIR = "docs/plots/training"
 
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
@@ -97,6 +105,11 @@ def main(cfg: DictConfig):
         load_model_func = ModelLoader().get_model(cfg.model_name)
         loss_func = tf.keras.losses.BinaryCrossentropy()
         optim = tf.keras.optimizers.Adam(learning_rate=cfg.params.learning_rate)
+        f1_score_metrics = tf.keras.metrics.F1Score(
+            average=None,
+            threshold=None,
+            name="f1_score",
+        )
 
         # Enable MLflow autologging
         mlflow.tensorflow.autolog(log_datasets=False)
@@ -113,7 +126,11 @@ def main(cfg: DictConfig):
                 model = load_model_func(
                     vectorization_layer=tokenizer, embedding_vocab=vocab_size
                 )
-                model.compile(loss=loss_func, optimizer=optim)
+                model.compile(
+                    loss=loss_func,
+                    optimizer=optim,
+                    metrics=[f1_score_metrics()],
+                )
                 logger.info(
                     f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs"
                 )
@@ -132,6 +149,31 @@ def main(cfg: DictConfig):
                 registered_model_name=f"{cfg.model_name}",
             )
             logger.success("Training Job completed")
+
+            logger.info(
+                f"Starting evaluation of Precision-Recall Curve on trained {cfg.model_name}"
+            )
+            plot_precision_recall_curve(
+                model,
+                eval_dataset=valid_data,
+                save_path=f"{PLOTS_DIR}/{cfg.model_name}_PR.png",
+            )
+            logger.info("Precision-Recall Curve evaluation completed.")
+
+            logger.info(
+                f"Starting evaluation of Confusion Matrix on trained {cfg.model_name}"
+            )
+            plot_confusion_matrix(
+                model,
+                eval_dataset=valid_data,
+                threshold=cfg.params.cm_threshold,
+                save_path=f"{PLOTS_DIR}/{cfg.model_name}_CM.png",
+            )
+            logger.info("Confusion Matrix evaluation completed.")
+    except ValueError:
+        logger.critical(
+            "Plotting of Confusion Matrix and Precision-Recall Curve failed due to empty data"
+        )
 
     except Exception as error:
         logger.exception(f"Training failed due to -> {error}.")

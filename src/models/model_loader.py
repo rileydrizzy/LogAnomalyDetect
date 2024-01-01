@@ -26,14 +26,14 @@ Note:
 
 """
 
-from models.baseline_cnn import build_model
+from models import baseline_cnn #, temporal_cn
 
 
 class ModelLoader:
     """Class for Loading TensorFlow Models"""
 
     def __init__(self):
-        self.models = {"1DCNN": build_model}
+        self.models = {"1DCNN": baseline_cnn.build_model}
 
     def get_model(self, model_name: str) -> object:
         """Build and Retrieve a TensorFlow Model Instance.

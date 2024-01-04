@@ -174,9 +174,8 @@ mlruns
 logs
 Tensorbord_logs
 
-#
-model_checkpoints
-model_artifact
+#model_artifact
+artifacts
 
 # Environment variables and keys
 environ_variables.sh

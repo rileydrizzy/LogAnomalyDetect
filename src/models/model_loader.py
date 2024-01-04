@@ -26,14 +26,14 @@ Note:
 
 """
 
-from models import baseline_cnn #, temporal_cn
+from models import baseline_cnn  # , temporal_cn
 
 
 class ModelLoader:
     """Class for Loading TensorFlow Models"""
 
     def __init__(self):
-        self.models = {"1DCNN": baseline_cnn.build_model}
+        self.models = {"11DCNN": baseline_cnn.build_model}
 
     def get_model(self, model_name: str) -> object:
         """Build and Retrieve a TensorFlow Model Instance.
@@ -48,7 +48,7 @@ class ModelLoader:
         - ValueError: If the specified model is not in the model list.
         """
         if model_name in self.models:
-            return self.models[model_name]()
+            return self.models[model_name]
         raise ValueError(
             f"Model '{model_name}' is not in the model list. Available models:\
                 {list(self.models.keys())}"

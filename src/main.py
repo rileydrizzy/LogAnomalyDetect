@@ -23,6 +23,7 @@ Example:
     python src/main.py
     ```
 """
+# TODO Add F1_Score
 
 
 import hydra
@@ -33,31 +34,10 @@ from omegaconf import DictConfig
 # Importing functions and classes from other modules
 from dataset_loader import get_dataset, get_vectorization_layer
 from models.model_loader import ModelLoader
-from utils.common_utils import (
-    get_device_strategy,
-    set_mlflow_tracking,
-    set_seed,
-    tensorboard_dir,
-    plot_confusion_matrix,
-    plot_precision_recall_curve,
-)
+from utils.common_utils import (get_device_strategy, plot_confusion_matrix,
+                                plot_precision_recall_curve,
+                                set_mlflow_tracking, set_seed, tensorboard_dir)
 from utils.logging import logger
-
-# Callbacks for model training
-checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
-    "model_checkpoints",
-    save_best_only=True,
-)
-early_stopping_cb = tf.keras.callbacks.EarlyStopping(
-    patience=10, restore_best_weights=True
-)
-reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
-    monitor="val_loss", factor=0.2, patience=5, verbose=1
-)
-callbacks_list = [checkpoints_cb, early_stopping_cb, reduce_lr]
-
-# Directory to save plots.
-PLOTS_DIR = "docs/plots/training"
 
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
@@ -78,6 +58,19 @@ def main(cfg: DictConfig):
 
         # Set up MLflow tracking for the experiment
         experiment_id = set_mlflow_tracking(cfg.model_name)
+        # Callbacks for model training
+        checkpoint_path = f"artifacts/{cfg.model_name}/model_checkpoints"
+
+        checkpoints_cb = tf.keras.callbacks.ModelCheckpoint(
+            checkpoint_path, save_best_only=True
+        )
+        early_stopping_cb = tf.keras.callbacks.EarlyStopping(
+            patience=10, restore_best_weights=True
+        )
+        reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.5, patience=5, verbose=1
+        )
+        callbacks_list = [checkpoints_cb, early_stopping_cb, reduce_lr]
 
         # Set up TensorBoard logging directory
         model_tensorb_dir = tensorboard_dir(cfg.model_name)
@@ -129,7 +122,6 @@ def main(cfg: DictConfig):
                 model.compile(
                     loss=loss_func,
                     optimizer=optim,
-                    metrics=[f1_score_metrics()],
                 )
                 logger.info(
                     f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs"
@@ -155,8 +147,10 @@ def main(cfg: DictConfig):
             )
             plot_precision_recall_curve(
                 model,
+                model_name=cfg.model_name,
                 eval_dataset=valid_data,
-                save_path=f"{PLOTS_DIR}/{cfg.model_name}_PR.png",
+                save_path=True,
+                save_to_mlflow=cfg.save_to_mlflow,
             )
             logger.info("Precision-Recall Curve evaluation completed.")
 
@@ -165,15 +159,16 @@ def main(cfg: DictConfig):
             )
             plot_confusion_matrix(
                 model,
+                model_name=cfg.model_name,
                 eval_dataset=valid_data,
                 threshold=cfg.params.cm_threshold,
-                save_path=f"{PLOTS_DIR}/{cfg.model_name}_CM.png",
+                save_path=True,
+                save_to_mlflow=cfg.save_to_mlflow,
             )
             logger.info("Confusion Matrix evaluation completed.")
-    except ValueError:
-        logger.critical(
-            "Plotting of Confusion Matrix and Precision-Recall Curve failed due to empty data"
-        )
+            logger.success("All jobs completed")
+    except mlflow.exceptions.MlflowException:
+        logger.exception("Erorr due to Mlflow login details")
 
     except Exception as error:
         logger.exception(f"Training failed due to -> {error}.")

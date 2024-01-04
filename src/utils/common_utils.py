@@ -16,13 +16,12 @@ import os
 from pathlib import Path
 from time import strftime
 
+import matplotlib.pyplot as plt
 import mlflow
+import numpy as np
 import seaborn as sns
 import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import precision_recall_curve, auc
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import auc, confusion_matrix, precision_recall_curve
 
 
 def set_seed(seed=42):
@@ -103,7 +102,12 @@ def get_device_strategy():
 
 
 def plot_precision_recall_curve(
-    model, eval_dataset, save_path=None, save_to_mlflow=False
+    model,
+    model_name,
+    eval_dataset,
+    plot_label="Training",
+    save_path=True,
+    save_to_mlflow=False,
 ):
     """Generate and plot the precision-recall curve for a TensorFlow model.
 
@@ -128,13 +132,13 @@ def plot_precision_recall_curve(
     x_test, y_test = zip(*eval_dataset)
 
     # Stack the batches of features and label vertically
-    x_test = np.vstack(list(x_test))
-    y_test = np.vstack(list(y_test))
+    x_test = np.concatenate(list(x_test))
+    y_test = np.concatenate(list(y_test))
 
     # Error handling for input shapes, if needed
     if len(x_test) == 0 or len(y_test) == 0:
         raise ValueError("Input data is empty.")
-
+    # print(f"The size of the dataset {len(x_test)}")
     y_pred = model.predict(x_test)
 
     # flatten the true labels
@@ -167,12 +171,13 @@ def plot_precision_recall_curve(
 
     plt.xlabel("Recall")
     plt.ylabel("Precision")
-    plt.title("Precision-Recall Curve with Threshold Points")
+    plt.title(f"{plot_label} Precision-Recall Curve with Threshold Points")
     plt.legend(loc="upper right")
     plt.grid(True)
 
     # Save the plot if save_path is provided
     if save_path:
+        save_path = f"{model_name}_PR.png"
         plt.savefig(save_path)
         print(f"Precision-Recall Curve saved at: {save_path}")
         if save_to_mlflow:
@@ -182,7 +187,13 @@ def plot_precision_recall_curve(
 
 
 def plot_confusion_matrix(
-    model, eval_dataset, threshold=0.5, save_path=None, save_to_mlflow=False
+    model,
+    model_name,
+    eval_dataset,
+    plot_label="Training",
+    threshold=0.5,
+    save_path=True,
+    save_to_mlflow=False,
 ):
     """
     Generate and plot the confusion matrix for a TensorFlow model.
@@ -208,8 +219,8 @@ def plot_confusion_matrix(
     x_test, y_test = zip(*eval_dataset)
 
     # Stack the batches of features and label vertically
-    x_test = np.vstack(list(x_test))
-    y_test = np.vstack(list(y_test))
+    x_test = np.concatenate(list(x_test))
+    y_test = np.concatenate(list(y_test))
 
     # Error handling for input shapes
     if len(x_test) == 0 or len(y_test) == 0:
@@ -231,12 +242,13 @@ def plot_confusion_matrix(
     )
     plt.xlabel("Predicted")
     plt.ylabel("True")
-    plt.title("Confusion Matrix")
-    plt.xticks([0, 1], ["Predicted 0", "Predicted 1"])
-    plt.yticks([0, 1], ["True 0", "True 1"])
+    plt.title(f"{plot_label} Confusion Matrix")
+    plt.xticks([0, 1], ["Predicted Normal Logs", "Predicted Abnormal Logs"])
+    plt.yticks([0, 1], ["True Normal Logs", "True Abnormal Logs"])
 
     # Save the plot if save_path is provided
     if save_path:
+        save_path = f"{model_name}_CM.png"
         plt.savefig(save_path)
         print(f"Confusion Matrix saved at: {save_path}")
         if save_to_mlflow:

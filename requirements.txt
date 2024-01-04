@@ -83,6 +83,7 @@ hydra-core==1.3.2
 identify==2.5.33
 idna==3.6
 importlib-metadata==7.0.1
+iniconfig==2.0.0
 iterative-telemetry==0.0.8
 itsdangerous==2.1.2
 Jinja2==3.1.2
@@ -116,9 +117,12 @@ pathspec==0.12.1
 pathvalidate==3.0.0
 Pillow==10.1.0
 platformdirs==3.11.0
+pluggy==1.3.0
 polars==0.20.2
 pre-commit==3.6.0
-protobuf>=4.20.1
+prompt-toolkit==3.0.43
+protobuf==4.23.4
+psutil==5.9.7
 pyarrow==14.0.2
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
@@ -131,6 +135,7 @@ Pygments==2.17.2
 pygtrie==2.5.0
 PyJWT==2.8.0
 pyparsing==3.1.1
+pytest==7.4.4
 python-dateutil==2.8.2
 python-slugify==8.0.1
 pytz==2023.3.post1
@@ -178,6 +183,7 @@ urllib3==1.26.18
 vine==5.1.0
 virtualenv==20.25.0
 voluptuous==0.14.1
+wcwidth==0.2.12
 webencodings==0.5.1
 websocket-client==1.7.0
 Werkzeug==3.0.1

@@ -25,4 +25,7 @@ params:
   cm_threshold: 0.5
 
 model_name:
-  "1DCNN"
+  "11DCNN"
+
+save_to_mlflow:
+  True

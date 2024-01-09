@@ -34,9 +34,14 @@ from omegaconf import DictConfig
 # Importing functions and classes from other modules
 from dataset_loader import get_dataset, get_vectorization_layer
 from models.model_loader import ModelLoader
-from utils.common_utils import (get_device_strategy, plot_confusion_matrix,
-                                plot_precision_recall_curve,
-                                set_mlflow_tracking, set_seed, tensorboard_dir)
+from utils.common_utils import (
+    get_device_strategy,
+    plot_confusion_matrix,
+    plot_precision_recall_curve,
+    set_mlflow_tracking,
+    set_seed,
+    tensorboard_dir,
+)
 from utils.logging import logger
 
 
@@ -58,6 +63,7 @@ def main(cfg: DictConfig):
 
         # Set up MLflow tracking for the experiment
         experiment_id = set_mlflow_tracking(cfg.model_name)
+
         # Callbacks for model training
         checkpoint_path = f"artifacts/{cfg.model_name}/model_checkpoints"
 
@@ -95,7 +101,7 @@ def main(cfg: DictConfig):
         )
 
         logger.info(f"Retrieving the model: {cfg.model_name}")
-        load_model_func = ModelLoader().get_model(cfg.model_name)
+        build_model_func = ModelLoader().get_model(cfg.model_name)
         loss_func = tf.keras.losses.BinaryCrossentropy()
         optim = tf.keras.optimizers.Adam(learning_rate=cfg.params.learning_rate)
         f1_score_metrics = tf.keras.metrics.F1Score(
@@ -113,15 +119,20 @@ def main(cfg: DictConfig):
         ):
             mlflow.set_tag("model_name", cfg.model_name)
 
+            # Class weigth
+            class_weight = {
+                0: cfg.params.majority_class_weight,
+                1: cfg.params.minority_class_weight,
+            }
+
             # Training the model within the distributed strategy scope
             with strategy.scope():
                 tokenizer, vocab_size = get_vectorization_layer(dataset=train_data)
-                model = load_model_func(
+                model = build_model_func(
                     vectorization_layer=tokenizer, embedding_vocab=vocab_size
                 )
                 model.compile(
-                    loss=loss_func,
-                    optimizer=optim,
+                    loss=loss_func, optimizer=optim, metrics=[f1_score_metrics]
                 )
                 logger.info(
                     f" Training {cfg.model_name} for {cfg.params.total_epochs} epochs"

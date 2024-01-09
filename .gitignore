@@ -160,13 +160,13 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# miscellaneous
+.gitpod.yml
+**/development/
 
 # Data and models
 data/*/*
 !.gitkeep
-
-#devops
-.gitpod.yml
 
 # Logs Directories 
 outputs

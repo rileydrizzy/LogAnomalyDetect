@@ -1,0 +1,7 @@
+evaluate and analysis c #
+pretrained embedding #
+learning rate scheduler #
+class weight
+github repo
+Confusion Matrix for error analysis c #
+Hyper-tunning of the model to be done

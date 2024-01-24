@@ -23,7 +23,6 @@ Example:
     python src/main.py
     ```
 """
-# TODO Add F1_Score
 
 
 import hydra
@@ -120,7 +119,7 @@ def main(cfg: DictConfig):
             mlflow.set_tag("model_name", cfg.model_name)
 
             # Class weigth
-            class_weight = {
+            classes_weights = {
                 0: cfg.params.majority_class_weight,
                 1: cfg.params.minority_class_weight,
             }
@@ -142,7 +141,7 @@ def main(cfg: DictConfig):
                     validation_data=valid_data,
                     epochs=cfg.params.total_epochs,
                     callbacks=callbacks_list,
-                    class_weight=None,
+                    class_weight=classes_weights,
                 )
 
             logger.info(f"Saving Trained {cfg.model_name} Model")
@@ -152,6 +151,10 @@ def main(cfg: DictConfig):
                 registered_model_name=f"{cfg.model_name}",
             )
             logger.success("Training Job completed")
+
+            logger.info(f"Starting evaluation of F1-Score on trained {cfg.model_name}")
+
+            result = model.evaluation(valid_data)
 
             logger.info(
                 f"Starting evaluation of Precision-Recall Curve on trained {cfg.model_name}"

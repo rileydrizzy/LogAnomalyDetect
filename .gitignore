@@ -172,7 +172,7 @@ data/*/*
 outputs
 mlruns
 logs
-Tensorbord_logs
+Tensorboard_logs
 
 #model_artifact
 artifacts

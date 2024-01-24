@@ -23,8 +23,8 @@ params:
   total_epochs: 1
   learning_rate: 0.01
   cm_threshold: 0.5
-  majority_class_weight : 0
-  minority_class_weight : 0
+  majority_class_weight : 0.509
+  minority_class_weight : 29.793
 
 model_name:
   "11DCNN"

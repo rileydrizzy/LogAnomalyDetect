@@ -14,7 +14,6 @@ def build_model(
     embedding_vocab=None,
     embedding_dim=32,
     vectorization_layer=None,
-    pre_trained_embed=False,
 ):
     """Builds a 1D Convolutional Neural Network model.
 
@@ -42,13 +41,9 @@ def build_model(
 
     """
     input_layer = tf.keras.Input(shape=(1,), dtype=tf.string, name="input_layer")
-
-    if pre_trained_embed:
-        embedding_layer = None
-    else:
-        embedding_layer = tf.keras.layers.Embedding(
-            input_dim=embedding_vocab, output_dim=embedding_dim
-        )
+    embedding_layer = tf.keras.layers.Embedding(
+        input_dim=embedding_vocab, output_dim=embedding_dim
+    )
 
     conv1d_layer = tf.keras.layers.Conv1D(
         filters=filter_num, kernel_size=kernel_size_, activation=activation_

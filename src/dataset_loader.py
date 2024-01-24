@@ -233,6 +233,7 @@ def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
             f"Required columns {required_columns} not present in the DataFrame."
         )
 
+    dataframe = dataframe.with_columns(dataframe["Target"].cast(pl.Float32))
     features_df = dataframe["Log"].to_numpy()
     target_df = dataframe["Target"].to_numpy()
 
@@ -240,6 +241,7 @@ def get_dataset(file_path, batch_size=2, shuffle_size=100, shuffle=False):
 
     if shuffle:
         dataset = dataset.shuffle(shuffle_size)
+    # dataset = dataset.map(convert_label_to_float)
     dataset = dataset.batch(batch_size).prefetch(buffer_size=tf.data.AUTOTUNE)
     return dataset
 

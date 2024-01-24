@@ -7,18 +7,9 @@ the `models` dictionary.
 Classes:
     - `ModelLoader`: Class for loading TensorFlow models.
 
-Functions:
+Methods:
     - `get_model(model_name: str) -> object`: Builds and retrieves a model instance based on \
         the provided model name.
-
-Example Usage:
-    ```python
-    # Create an instance of ModelLoader
-    model_loader = ModelLoader()
-
-    # Get a model instance by name
-    cnn_model = model_loader.get_model("1DCNN")
-    ```
 
 Note:
     Ensure that the desired models and their corresponding build functions are correctly defined \
@@ -26,11 +17,13 @@ Note:
 
 """
 
-from models import baseline_cnn  # , temporal_cn
+from models import baseline_cnn
 
 
 class ModelLoader:
-    """Class for Loading TensorFlow Models"""
+    """
+    Class for Loading TensorFlow Models
+    """
 
     def __init__(self):
         self.models = {"11DCNN": baseline_cnn.build_model}
